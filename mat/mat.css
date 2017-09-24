@@ -1,0 +1,37 @@
+body {
+  font-family: sans-serif;
+}
+
+span.formula {
+  font-size: 36px;
+}
+
+input.result {
+  border: 2px solid;
+  padding: 4px;
+  font-size: 24px;
+}
+
+span.result {
+  font-weight: bold;
+  font-size: 125%;
+}
+
+input[type=submit] {
+  border: none;
+  color: white;
+  margin: 16px;
+  padding: 8px;
+  background-color: black;
+  text-align: center;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+h2.success {
+  color: green;
+}
+
+h2.fail {
+  color: red;
+}

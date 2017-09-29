@@ -1,10 +1,12 @@
 <?php
 
 require_once 'include/formula.class.php';
+require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
 
 define('POCATECNI_POCET', 10);
 define('POCATECNI_OBTIZNOST', 12);
+define('PRIDAT_ZA_CHYBU', 2);
 
 function sayTime($timestamp) {
   $t = time() - $timestamp;
@@ -27,9 +29,17 @@ function sayTime($timestamp) {
   return implode(', ', array_reverse($ret));
 }
 
+function encryptObject($f) {
+  return base64_encode(serialize($f));
+}
+
+function decryptObject($text) {
+  return unserialize(base64_decode($text));
+}
 
 $html = new HTML_Page2();
 $html->addStyleSheet('mat.css');
+$level = new FormulaLevelNasobilka();
 
 $elements = array();
 $operators = array();
@@ -38,103 +48,100 @@ $count = null;
 $starttime = null;
 $solved = 0;
 $correct = 0;
+$nofail = "no";
+$check = null;
 foreach ($_POST as $key => $val) {
   if (is_numeric($val)) {
-    if (strpos($key, 'element') === 0) $elements[$key] = $val;
-    if (strpos($key, 'operator') === 0) $operators[$key] = $val;
-    if (strpos($key, 'result') === 0) $results[$key] = $val;
+    if (strpos($key, 'result') === 0) $results[$key] = intval($val);
     if ($key == 'countleft') $count = $val;
     if ($key == 'starttime') $starttime = $val;
     if ($key == 'solved') $solved = $val + 1;
     if ($key == 'correct') $correct = $val;
+  } else {
+    if ($key == 'nofail') $nofail = htmlspecialchars($val);
+    if ($key == 'formula' ) $check = decryptObject($val);
+    if ($key == 'level' ) $level = decryptObject($val);
   }
 }
 if( $count == null ) { $count = POCATECNI_POCET; }
 if ($starttime == null) { $starttime = time(); }
-
-$check = null;
-$sentres = null;
-if ((count($elements) == 2) && (count($operators) == 1)) {
-  // Simple Formula
-  if (count($results) == 1) {
-    $check = new SimpleFormula($elements['element1'], $operators['operator1'], $elements['element2']);
-    $sentres = $results['result1'];
-  } elseif (count($results) == 2) {
-    $check = new DeleniSeZbytkem(0, $elements['element1'], $elements['element2']);
-    $sentres = array ($results['result1'], $results['result2']);
-  } else {
-    if ($count < POCATECNI_POCET) { $count++; }
-  }
-} elseif (count($elements) == 3) {
-  // Triple Formula
-  if ((count($operators) == 2) && (count($results) == 1)) {
-    $check = new TripleFormula($elements['element1'], $operators['operator1'], $elements['element2'], $operators['operator2'], $elements['element3']);
-    $sentres = $results['result1'];
-  } else {
-    if ($count < POCATECNI_POCET) { $count++; }
-  }
-} 
+$level->solved += 1;
 
 $spatne = FALSE;
+$priklad = null;
+$result_msg = '';
 if ($check !== null) {
   $res = $check->getResult();
-  if ($res == $sentres) {
+  if (!is_array($res)) {
+    $res = array($res);
+  }
+  if (($check instanceof DeleniSeZbytkem) && (!isset($results['result2']))) {
+    $results['result2'] = 0;
+  }
+  if (array_values($res) == array_values($results)) {
     // Spravne
     $count--;
-    $correct++;
+    $level->correct += 1;
+    $level->addWeight(get_class($check), -100);
+    $result_msg = '<h2 class="success">Spr&aacute;vn&ecaron;!</h2>';
   } else {
     // Spatne
 
-    if ($count < POCATECNI_POCET) { $count++; }
+    if ($count < POCATECNI_POCET) { $count += min(PRIDAT_ZA_CHYBU, (POCATECNI_POCET - $count)); }
     $spatne=TRUE;
+    $level->addWeight(get_class($check));
+    $result_msg = '<h2 class="fail">&Scaron;patn&ecaron;!</h2>';
+    if ($nofail == "yes") {
+      $priklad = $check;
+    } else {
+      $result_msg .= '<p class="correctresult">'. $check->toHTML(TRUE). '</p>';
+    }
   }
 } else {
   $check = new RandomSimpleFormula();
 }
 
-do {
-  $obtiznost = mt_rand(1, POCATECNI_OBTIZNOST);
-  if ($obtiznost > 8) {
-    $priklad = new StredniNasobilka(4*$obtiznost);
-  }
-  elseif ($obtiznost > 5) {
-    $priklad = new DeleniSeZbytkem(99);
-  }
-  elseif ($obtiznost > 2) {
-    $priklad = new DvaSoucty(1000);
-  }
-  else {
-    $priklad = new MalaNasobilka(1000);
-  }
-} while ($priklad->getResult() == $check->getResult());
+if ($priklad === null) {
+  $priklad = $level->getFormula();
+}
 
-$html->setTitle($priklad->name);
+$html->setTitle('MAT');
 // $html->addBodyContent('<pre>'. print_r($priklad, TRUE). '</pre>');
 
 if ($count == 0) {
   $html->addBodyContent('<h2 class="success">Hotovo!</h2>');
   $html->addBodyContent('<a href="?">Znova</a>');
 } else {
-  if ( $spatne) { 
-    $html->addBodyContent ('<h2 class="fail">&Scaron;patn&ecaron;!</h2><p>'. $check->toHTML(TRUE). '</p>'); 
-  } elseif ($sentres !== null) {
-    $html->addBodyContent ('<h2 class="success">Spr&aacute;vn&ecaron;!</h2>'); 
+  $html->addBodyContent($result_msg);
+  $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>");
+  if (($nofail == "no") || (!$spatne)) {
+    $html->addBodyContent('<h1>'. $priklad->name. '</h1>');
   }
-  $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>\n<p>");
-  $html->addBodyContent('<h1>'. $priklad->name. '</h1>');
   $html->addBodyContent('<form method="post">');
   $html->addBodyContent($priklad->toHTML());
   $html->addBodyContent($priklad->getResultHTMLForm());
   $html->addBodyContent('<input type="hidden" name="countleft" value="'. $count. '" />');
   $html->addBodyContent('<input type="hidden" name="starttime" value="'. $starttime. '" />');
-  $html->addBodyContent('<input type="hidden" name="solved" value="'. $solved. '" />');
-  $html->addBodyContent('<input type="hidden" name="correct" value="'. $correct. '" />');
+  $html->addBodyContent('<input type="hidden" name="formula" value="'. encryptObject($priklad). '" />');
+  $html->addBodyContent('<input type="hidden" name="level" value="'. encryptObject($level). '" />');
   $html->addBodyContent('<input type="submit" value="Hotovo">');
-  $html->addBodyContent('</form></p>');
+  if($level->solved == 0) {
+    $html->addBodyContent('<br /><input type="checkbox" name="nofail" value="yes" />&nbsp;Opravy');
+  } else {
+    $html->addBodyContent('<input type="hidden" name="nofail" value="'. $nofail. '" />');
+  }
+  $html->addBodyContent('</form>');
 }
 
-if (time() - $starttime > 0) {
-  $html->addBodyContent('<p>Spr&aacute;vn&ecaron; <span class="correct">'. $correct. '</span> z <span class="solved">'. $solved. '</span> p&rcaron;&iacute;klad&uring; za <span class="time">'. sayTime($starttime). '</span>.</p>');
+// $html->addBodyContent('<pre>'. print_r($level, TRUE). '</pre>');
+if (time() - $starttime > 2) {
+  $html->addBodyContent('<p>Spr&aacute;vn&ecaron; <span class="correct">'. $level->correct. '</span> z <span class="solved">'. $level->solved. '</span> p&rcaron;&iacute;klad&uring;');
+  if ($nofail == 'yes') {
+    $html->addBodyContent(' s&nbsp;opravami');
+  }
+  $html->addBodyContent(' za <span class="time">'. sayTime($starttime). '</span>.</p>');
 }
+$html->addBodyContent('<p class="footer">MAT info a licence: <a href="https://github.com/buralien/mat">GitHub</a></p>');
+
 $html->display();
 ?>

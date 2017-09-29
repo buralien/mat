@@ -10,6 +10,10 @@ abstract class FormulaElement {
   abstract public function toHTML();
   abstract public function toStr();
   abstract function getValue();
+  public function __toString() {
+    return $this->toStr();
+  }
+
 }
 
 class PrimitiveElement extends FormulaElement {
@@ -120,63 +124,55 @@ class RandomOperatorElement extends OperatorElement {
 }
 
 class CombinedElement extends FormulaElement {
-  private $el1;
-  private $operator;
-  private $el2;
+  protected $element1;
+  protected $operator;
+  protected $element2;
 
   function __construct (FormulaElement $el1 = null, OperatorElement $op = null, FormulaElement $el2 = null) {
     if ($el1 == null) {
-      $this->el1 = new PrimitiveElement();
+      $this->element1 = new RandomPrimitiveElement();
     } else {
-      $this->el1 = $el1;
+      $this->element1 = $el1;
     }
     if ($el2 == null) {
-      $this->el2 = new PrimitiveElement();
+      $this->element2 = new RandomPrimitiveElement();
     } else {
-      $this->el2 = $el1;
+      $this->element2 = $el2;
     }
     if ($op == null) {
-      $this->operator = new OperatorElement();
+      $this->operator = new RandomOperatorElement();
     } else {
       $this->operator = $op;
     }
   }
 
   public function getValue() {
-    $expr = $this->el1->getValue() . $this->operator->getMath() . $this->el2->getValue();
+    $expr = $this->element1->getValue() . $this->operator->getMath() . $this->element2->getValue();
     return eval('return '. $expr. ';');
   }
 
   public function toHTML() {
-    $html = '';
-    if ($this->el1 instanceof CombinedElement) {
-      $html .= '(&nbsp;'. $this->el1->toHTML(). '&nbsp;)';
-    } else {
-      $html .= $this->el1->toHTML(). '&nbsp;';
-    }
+    $html = '(&nbsp;';
+    $html .= $this->element1->toHTML(). ' ';
     $html .= $this->operator->toHTML(). '&nbsp;';
-    if ($this->el2 instanceof CombinedElement) {
-      $html .= '(&nbsp;'. $this->el2->toHTML(). '&nbsp;)';
-    } else {
-      $html .= $this->el2->toHTML();
-    }
+    $html .= $this->element2->toHTML(). '&nbsp;)';
     return $html;
   }
 
   public function toStr () {
-    $text = '';
-    if ($this->el1 instanceof CombinedElement) {
-      $text .= '( '. $this->el1->toStr(). ' )';
-    } else {
-      $text .= $this->el1->toStr(). ' ';
-    }
+    $text = '( ';
+    $text .= $this->element1->toStr(). ' ';
     $text .= $this->operator->toStr(). ' ';
-    if ($this->el2 instanceof CombinedElement) {
-      $text .= '( '. $this->el2->toStr(). ' )';
-    } else {
-      $text .= $this->el2->toStr();
-    }
+    $text .= $this->element2->toStr(). ' )';
     return $text;
+  }
+}
+
+class RandomCombinedElement extends CombinedElement {
+  function __construct($max = 0, $min = 0, $opmask = 0) {
+    $this->element1 = new RandomPrimitiveElement($max, $min);
+    $this->element2 = new RandomPrimitiveElement($max, $min);
+    $this->operator = new RandomOperatorElement($opmask);
   }
 }
 

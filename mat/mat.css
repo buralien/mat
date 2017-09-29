@@ -28,10 +28,19 @@ input[type=submit] {
   font-size: 20px;
 }
 
+input[type=number] {
+  width: 4em;
+}
+
 h2.success {
   color: green;
 }
 
 h2.fail {
   color: red;
+}
+
+p.footer {
+  font-size: 8px;
+  color: grey;
 }

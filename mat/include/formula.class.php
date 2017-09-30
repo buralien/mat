@@ -2,20 +2,22 @@
 require_once 'element.class.php';
 
 abstract class Formula {
-  public $name;
   abstract public function toHTML($result = FALSE);
   abstract public function toStr();
   abstract public function getResult();
   abstract public function getResultHTMLForm();
+  public function __toString() {
+    $this->toStr();
+  }
 } // class Formula
 
 class SimpleFormula extends Formula {
+  public static $name = 'Aritmetika';
   protected $element1;
   protected $operator;
   protected $element2;
 
   function __construct ($el1, $op, $el2) {
-    $this->name = "Simple formula";
     $this->element1 = new PrimitiveElement($el1);
     $this->element2 = new PrimitiveElement($el2);
     $this->operator = new OperatorElement($op);
@@ -30,7 +32,7 @@ class SimpleFormula extends Formula {
   }
 
   public function toStr () {
-    return $this->element1->toStr() . ' ' . $this->operator->toStr() . ' ' . $this->element2->toStr();
+    return $this->element1. ' ' . $this->operator. ' ' . $this->element2;
   }
 
   public static function fromStr($frml) {
@@ -65,8 +67,11 @@ class SimpleFormula extends Formula {
 
 class RandomSimpleFormula extends SimpleFormula {
   function __construct ($max = null) {
-    $this->name = "Simple formula";
-    if ($max === null) $max = mt_getrandmax();
+    if ($max === null) {
+      $max = mt_getrandmax();
+    } else {
+      $this->name .= ' do '. $max;
+    }
     do {
       $this->element1 = new RandomPrimitiveElement($max);
       $this->element2 = new RandomPrimitiveElement($max, 1);
@@ -77,6 +82,7 @@ class RandomSimpleFormula extends SimpleFormula {
 } // class RandomSimpleFormula
 
 class TripleFormula extends Formula {
+  public static $name = "Aritmetika (3 &ccaron;&iacute;sla)";
   protected $element1;
   protected $operator1;
   protected $element2;
@@ -84,7 +90,6 @@ class TripleFormula extends Formula {
   protected $element3;
 
   function __construct ($el1, $op1, $el2, $op2, $el3) {
-    $this->name = "Triple formula";
     $this->element1 = new PrimitiveElement($el1);
     $this->operator1 = new OperatorElement($op1);
     do {
@@ -100,7 +105,7 @@ class TripleFormula extends Formula {
     return eval('return '. $expr. ';');
   }
   public function toStr () {
-    return $this->element1->toStr() . ' ' . $this->operator1->toStr() . ' ' . $this->element2->toStr() . ' ' . $this->operator2->toStr() . ' ' . $this->element3->toStr();
+    return $this->element1. ' ' . $this->operator1. ' ' . $this->element2. ' ' . $this->operator2. ' ' . $this->element3;
   }
   public function toHTML ($result = FALSE) {
     $html = '<span class="formula">';
@@ -127,8 +132,10 @@ class TripleFormula extends Formula {
 } // class TripleFormula
 
 class MalaNasobilka extends SimpleFormula {
+  public static $name = 'Mal&aacute; n&aacute;sobilka';
   function __construct ($max = 100) {
-    $this->name = "Mal&aacute; n&aacute;sobilka";
+    if ($max != 100) 
+      $this->name .= ' do '. $max;
     $this->operator = new OperatorElement(OP_KRAT);
     $this->element2 = new RandomPrimitiveElement(10, 2);
     $a = mt_rand(0, 10);
@@ -144,8 +151,9 @@ class MalaNasobilka extends SimpleFormula {
 }
 
 class StredniNasobilka extends SimpleFormula {
+  public static $name = 'N&aacute;sobilka';
   function __construct ($max = 100) {
-    $this->name = "St&rcaron;edn&iacute; n&aacute;sobilka";
+    $this->name .= ' do '. $max;
     do {
       $this->element1 = new RandomPrimitiveElement($max, 11);
     } while ($this->element1->getValue() % 10 == 0);
@@ -155,8 +163,8 @@ class StredniNasobilka extends SimpleFormula {
 }
 
 class VelkaNasobilka extends SimpleFormula {
+  public static $name = 'Velk&aacute; n&aacute;sobilka';
   function __construct () {
-    $this->name = "Velk&aacute; n&aacute;sobilka";
     $this->element1 = new RandomPrimitiveElement(100, 11);
     $this->element2 = new RandomPrimitiveElement(100, 11);
     $this->operator = new OperatorElement(OP_KRAT);
@@ -164,9 +172,13 @@ class VelkaNasobilka extends SimpleFormula {
 }
 
 class DeleniSeZbytkem extends SimpleFormula {
+  public static $name = 'D&ecaron;len&iacute; se zbytkem';
   function __construct ($max = 0, $el1 = null, $el2 = null) {
-    $this->name = "D&ecaron;len&iacute; se zbytkem";
-    if ($max == 0) { $max = mt_getrandmax(); }
+    if ($max == 0) { 
+      $max = mt_getrandmax(); 
+    } else {
+      $this->name .= ' do '. $max;
+    }
     if ($el2 === null) {
       $this->element2 = new RandomPrimitiveElement(ceil($max / 10), 2);
     } else {
@@ -207,8 +219,9 @@ class DeleniSeZbytkem extends SimpleFormula {
 } // class DeleniSeZbytkem
 
 class VelkeScitani extends SimpleFormula {
+  public static $name = 'S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute;';
   function __construct($max = 1000) {
-    $this->name = "Velk&eacute; s&ccaron;&iacute;t&aacute;n&iacute;";
+    $this->name .= ' do '. $max;
     do {
       $this->element1 = new RandomPrimitiveElement($max, 11);
       $this->element2 = new RandomPrimitiveElement($max, 11);
@@ -219,8 +232,9 @@ class VelkeScitani extends SimpleFormula {
 }
 
 class DvaSoucty extends TripleFormula {
+  public static $name = "S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute; (3 &ccaron;&iacute;sla)";
   function __construct ($max = 1000) {
-    $this->name = "Dva sou&ccaron;ty";
+    $this->name .= ' do '. $max;
     do {
       $this->element1 = new RandomPrimitiveElement($max, 11);
       $this->element2 = new RandomPrimitiveElement($max, 11);

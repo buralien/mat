@@ -33,7 +33,7 @@ class PrimitiveElement extends FormulaElement {
   }
 
   public function toHTML() {
-    return '<span class="primitive">' . $this->toStr() . '</span>';
+    return '<span class="primitive">' . $this. '</span>';
   }
 
   public function toStr() {
@@ -99,7 +99,7 @@ class OperatorElement extends FormulaElement {
         $html .= '&times;';
         break;
       default:
-        $html .= $this->toStr();
+        $html .= $this;
     }
     $html .= '</span>';
     return $html;
@@ -161,9 +161,9 @@ class CombinedElement extends FormulaElement {
 
   public function toStr () {
     $text = '( ';
-    $text .= $this->element1->toStr(). ' ';
-    $text .= $this->operator->toStr(). ' ';
-    $text .= $this->element2->toStr(). ' )';
+    $text .= $this->element1. ' ';
+    $text .= $this->operator. ' ';
+    $text .= $this->element2. ' )';
     return $text;
   }
 }

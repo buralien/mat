@@ -1,5 +1,12 @@
 body {
   font-family: sans-serif;
+  line-height: 2;
+}
+
+span.lvl_desc {
+  color: grey;
+  padding-left: 2em;
+  font-size: 80%;
 }
 
 span.formula {

@@ -8,6 +8,15 @@ define('POCATECNI_POCET', 10);
 define('POCATECNI_OBTIZNOST', 12);
 define('PRIDAT_ZA_CHYBU', 2);
 
+$levels = array(
+  'FormulaLevel1',
+  'FormulaLevel2',
+  'FormulaLevel3a',
+  'FormulaLevel3b',
+  'FormulaLevel4a',
+  'FormulaLevelNasobilka'
+  );
+
 function sayTime($timestamp) {
   $t = time() - $timestamp;
   $ret = array();
@@ -50,22 +59,35 @@ $solved = 0;
 $correct = 0;
 $nofail = "no";
 $check = null;
+// $html->addBodyContent(print_r($_POST, TRUE));
 foreach ($_POST as $key => $val) {
   if (is_numeric($val)) {
     if (strpos($key, 'result') === 0) $results[$key] = intval($val);
     if ($key == 'countleft') $count = $val;
     if ($key == 'starttime') $starttime = $val;
-    if ($key == 'solved') $solved = $val + 1;
-    if ($key == 'correct') $correct = $val;
+    if ($key == 'init_level') {
+      $clsid = $levels[intval($val)];
+      $level = new $clsid();
+    }
   } else {
     if ($key == 'nofail') $nofail = htmlspecialchars($val);
     if ($key == 'formula' ) $check = decryptObject($val);
-    if ($key == 'level' ) $level = decryptObject($val);
+    if ($key == 'level' ) {
+      $level = decryptObject($val);
+      $level->solved += 1;
+    }
   }
 }
-if( $count == null ) { $count = POCATECNI_POCET; }
-if ($starttime == null) { $starttime = time(); }
-$level->solved += 1;
+
+if ( $count == null ) { 
+  include 'include/init.php';
+  //$count = POCATECNI_POCET; 
+  $html->display();
+  die();
+} elseif ($level->solved == 0) {
+  $level->max_formulas = $count;
+}
+if ( $starttime == null ) { $starttime = time(); }
 
 $spatne = FALSE;
 $priklad = null;
@@ -87,7 +109,7 @@ if ($check !== null) {
   } else {
     // Spatne
 
-    if ($count < POCATECNI_POCET) { $count += min(PRIDAT_ZA_CHYBU, (POCATECNI_POCET - $count)); }
+    if ($count < $level->max_formulas) { $count += min(PRIDAT_ZA_CHYBU, ($level->max_formulas - $count)); }
     $spatne=TRUE;
     $level->addWeight(get_class($check));
     $result_msg = '<h2 class="fail">&Scaron;patn&ecaron;!</h2>';
@@ -97,8 +119,6 @@ if ($check !== null) {
       $result_msg .= '<p class="correctresult">'. $check->toHTML(TRUE). '</p>';
     }
   }
-} else {
-  $check = new RandomSimpleFormula();
 }
 
 if ($priklad === null) {
@@ -115,7 +135,7 @@ if ($count == 0) {
   $html->addBodyContent($result_msg);
   $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>");
   if (($nofail == "no") || (!$spatne)) {
-    $html->addBodyContent('<h1>'. $priklad->name. '</h1>');
+    $html->addBodyContent('<h1>'. $priklad::$name. '</h1>');
   }
   $html->addBodyContent('<form method="post">');
   $html->addBodyContent($priklad->toHTML());
@@ -125,16 +145,12 @@ if ($count == 0) {
   $html->addBodyContent('<input type="hidden" name="formula" value="'. encryptObject($priklad). '" />');
   $html->addBodyContent('<input type="hidden" name="level" value="'. encryptObject($level). '" />');
   $html->addBodyContent('<input type="submit" value="Hotovo">');
-  if($level->solved == 0) {
-    $html->addBodyContent('<br /><input type="checkbox" name="nofail" value="yes" />&nbsp;Opravy');
-  } else {
-    $html->addBodyContent('<input type="hidden" name="nofail" value="'. $nofail. '" />');
-  }
+  $html->addBodyContent('<input type="hidden" name="nofail" value="'. $nofail. '" />');
   $html->addBodyContent('</form>');
 }
 
 // $html->addBodyContent('<pre>'. print_r($level, TRUE). '</pre>');
-if (time() - $starttime > 2) {
+if ((time() - $starttime > 2) || ($level->solved > 0)) {
   $html->addBodyContent('<p>Spr&aacute;vn&ecaron; <span class="correct">'. $level->correct. '</span> z <span class="solved">'. $level->solved. '</span> p&rcaron;&iacute;klad&uring;');
   if ($nofail == 'yes') {
     $html->addBodyContent(' s&nbsp;opravami');

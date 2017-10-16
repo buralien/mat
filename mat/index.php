@@ -1,6 +1,5 @@
 <?php
 
-require_once 'include/formula.class.php';
 require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
 
@@ -34,7 +33,7 @@ function sayTime($timestamp) {
   }
   $t = floor($t / 24);
   if ($t > 0) {
-    $ret[] = $t. ' dni';
+    $ret[] = $t. ' dn&iacute;';
   }
   return implode(', ', array_reverse($ret));
 }
@@ -56,8 +55,6 @@ $operators = array();
 $results = array();
 $count = null;
 $starttime = null;
-$solved = 0;
-$correct = 0;
 $nofail = "no";
 $check = null;
 // $html->addBodyContent(print_r($_POST, TRUE));
@@ -157,6 +154,7 @@ if ((time() - $starttime > 2) || ($level->solved > 0)) {
   if ($nofail == 'yes') {
     $html->addBodyContent(' s&nbsp;opravami');
   }
+  $html->addBodyContent(' ('. $level->name. ')');
   $html->addBodyContent(' za <span class="time">'. sayTime($starttime). '</span>.</p>');
 }
 $html->addBodyContent('<p class="footer">MAT info a licence: <a href="https://github.com/buralien/mat">GitHub</a></p>');

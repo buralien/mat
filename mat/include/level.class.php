@@ -141,4 +141,13 @@ class FormulaLevelNasobilka extends GenericLevel {
   }
 }
 
+class FormulaLevelAnglictina extends GenericLevel {
+  function __construct() {
+    $this->name = 'Angli&ccaron;tina';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array(100), 500);
+    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array(100));
+  }
+}
+
 ?>

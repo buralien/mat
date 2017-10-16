@@ -14,7 +14,8 @@ $levels = array(
   'FormulaLevel3a',
   'FormulaLevel3b',
   'FormulaLevel4a',
-  'FormulaLevelNasobilka'
+  'FormulaLevelNasobilka',
+  'FormulaLevelAnglictina'
   );
 
 function sayTime($timestamp) {
@@ -70,6 +71,7 @@ foreach ($_POST as $key => $val) {
       $level = new $clsid();
     }
   } else {
+    if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
     if ($key == 'nofail') $nofail = htmlspecialchars($val);
     if ($key == 'formula' ) $check = decryptObject($val);
     if ($key == 'level' ) {
@@ -100,7 +102,7 @@ if ($check !== null) {
   if (($check instanceof DeleniSeZbytkem) && (!isset($results['result2']))) {
     $results['result2'] = 0;
   }
-  if (array_values($res) == array_values($results)) {
+  if ($check->validateResult($results)) {
     // Spravne
     $count--;
     $level->correct += 1;

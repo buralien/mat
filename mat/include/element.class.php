@@ -176,4 +176,81 @@ class RandomCombinedElement extends CombinedElement {
   }
 }
 
+class EnglishTextElement extends FormulaElement {
+  protected $element;
+
+  function __construct($value) {
+    $this->element = intval($value);
+  }
+
+  public function getValue() {
+    return $this->element;
+  }
+
+  public function toStr() {
+    return $this->sayNumber($this->element);
+  }
+
+  public function toHTML() {
+    return '<span class="primitive">'. $this->sayNumber($this->element). '</span>';
+  }
+    
+  private function sayNumber($number) {
+    switch ($number) {
+      case 0: return 'zero';
+      case 1: return 'one';
+      case 2: return 'two';
+      case 3: return 'three';
+      case 4: return 'four';
+      case 5: return 'five';
+      case 6: return 'six';
+      case 7: return 'seven';
+      case 8: return 'eight';
+      case 9: return 'nine';
+      case 10: return 'ten';
+      case 11: return 'eleven';
+      case 12: return 'twelve';
+      case 13: return 'thirteen';
+      case 14: return 'fourteen';
+      case 15: return 'fifteen';
+      case 16: return 'sixteen';
+      case 17: return 'seventeen';
+      case 18: return 'eighteen';
+      case 19: return 'nineteen';
+      default:
+        $text = array();
+        $m = floor($number / 1000000);
+        if ($m > 0) $text[] = $this->sayNumber($m). ' million';
+        $number %= 1000000;
+        $t = floor($number / 1000);
+        if ($t > 0) $text[] = $this->sayNumber($t). ' thousand';
+        $number %= 1000;
+        $h = floor($number / 100);
+        if ($h > 0) $text[] = $this->sayNumber($h). ' hundered';
+        $number %= 100;
+        if ($number < 20) {
+          if ($number > 0) {
+            $text[] = $this->sayNumber($number);
+          }
+        } elseif ($number > 0) {
+          $d = floor($number / 10);
+          switch ($d) {
+            case 2: $text[] = 'twenty'; break;
+            case 3: $text[] = 'thirty'; break;
+            case 4: $text[] = 'fourty'; break;
+            case 5: $text[] = 'fifty'; break;
+            case 6: $text[] = 'sixty'; break;
+            case 7: $text[] = 'seventy'; break;
+            case 8: $text[] = 'eighty'; break;
+            case 9: $text[] = 'ninety'; break;
+          }
+          $number %= 10;
+          if ($number > 0) $text[] = $this->sayNumber($number);
+        } 
+        return implode(' ', $text);
+    } 
+  }
+
+}
+
 ?>

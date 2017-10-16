@@ -12,6 +12,13 @@ abstract class Formula {
   public function getResultHTMLForm() {
     return '<input type="number" class="result" name="result1" autofocus />';
   }
+  public function validateResult($input) {
+    if (is_array($input)) {
+      return ( intval($input['result1']) == $this->getResult() );
+    } else {
+      return ( intval($input) == $this->getResult() );
+    }
+  }
 } // class Formula
 
 class SimpleFormula extends Formula {
@@ -248,6 +255,14 @@ class DeleniSeZbytkem extends SimpleFormula {
     $html .= '</span>';
     return $html;
   }
+
+  public function validateResult($input) {
+    if (is_array($input)) {
+      if (count($input) == 2) {
+        return ( $this->getResult() == array_values($input) );
+      } else return FALSE;
+    } else return FALSE;
+  }
 } // class DeleniSeZbytkem
 
 class VelkeScitani extends SimpleFormula {
@@ -471,6 +486,82 @@ class SimpleBracketFormula extends SimpleFormula {
       $this->operator = new RandomOperatorElement(OP_PLUS + OP_MINUS);
       $res = $this->getResult();
     } while (($res < 0) || ($res > $max) || (floor($res) < $res));
+  }
+}
+
+class EnglishTextFormula extends Formula {
+  public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky';
+  private $element;
+
+  function __construct($max = 100, $min = 0) {
+    if ($min < 0) $min = 0;
+    if ($max < $min) $max = $min;
+    $this->element = new EnglishTextElement(mt_rand($min, $max));
+  }
+
+  public function getResult() {
+    return $this->element->getValue();
+  }
+
+  public function toStr($result = FALSE) {
+    $text = $this->element->toStr();
+    if ($result) {
+      $text .= ' is '. $this->element->getValue();
+    }
+    return $text;
+  }
+
+  public function toHTML($result = FALSE) {
+    $text = '<span class="formula">'. $this->element->toHTML();
+    $text .= '&nbsp;is ';
+    if ($result) {
+      $text .= '<span class="result">'. $this->element->getValue(). '</span>';
+    }
+    $text .= '</span>';
+    return $text;
+  }
+}
+
+class ReverseEnglishTextFormula extends Formula {
+  public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (z &ccaron;&iacute;sel)';
+  private $element;
+
+  function __construct($max = 100, $min = 0) {
+    if ($min < 0) $min = 0;
+    if ($max < $min) $max = $min;
+    $this->element = new EnglishTextElement(mt_rand($min, $max));
+  }
+
+  public function getResult() {
+    return $this->element->toStr();
+  }
+
+  public function toStr($result = FALSE) {
+    $text = $this->element->getValue();
+    if ($result) {
+      $text .= ' is '. $this->element->toStr();
+    }
+    return $text;
+  }
+
+  public function toHTML($result = FALSE) {
+    $text = '<span class="formula">'. $this->element->getValue();
+    $text .= '&nbsp;is ';
+    if ($result) {
+      $text .= '<span class="result">'. $this->element->toHTML(). '</span>';
+    }
+    $text .= '</span>';
+    return $text;
+  }
+
+  public function getResultHTMLForm() {
+    return '<input type="text" class="result" name="result1" autocomplete="off" autofocus />';
+  }
+
+  public function validateResult($input) {
+    if (is_array($input)) $input = implode(' ', $input);
+    $input = strtolower($input);
+    return ( $this->getResult() == $input );
   }
 }
 

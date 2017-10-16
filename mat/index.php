@@ -134,7 +134,7 @@ if ($count == 0) {
   $html->addBodyContent($result_msg);
   $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>");
   if (($nofail == "no") || (!$spatne)) {
-    $html->addBodyContent('<h1>'. $priklad::$name. '</h1>');
+    $html->addBodyContent('<h1>'. $priklad->name. '</h1>');
   }
   $html->addBodyContent('<form method="post">');
   $html->addBodyContent($priklad->toHTML());

@@ -19,6 +19,9 @@ abstract class Formula {
       return ( intval($input) == $this->getResult() );
     }
   }
+  public function getName() {
+    return static::$name;
+  }
 } // class Formula
 
 class SimpleFormula extends Formula {
@@ -472,7 +475,7 @@ class SimpleBracketFormula extends SimpleFormula {
     if ($max == 0) {
       $max = mt_getrandmax();
     } else {
-      $this::$name .= ' do '. $max;
+      self::$name .= ' do '. $max;
     }
     $this->EXCLUDE_NUMBERS = array(0);
     $this->LOW_PROBABILITY = array(1, 10);

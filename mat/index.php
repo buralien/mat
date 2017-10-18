@@ -81,6 +81,7 @@ foreach ($_POST as $key => $val) {
 if ( $count == null ) { 
   include 'include/init.php';
   //$count = POCATECNI_POCET; 
+  $html->addBodyContent('<p class="footer">MAT info a licence: <a href="https://github.com/buralien/mat">GitHub</a></p>');
   $html->display();
   die();
 } elseif ($level->solved == 0) {
@@ -134,7 +135,7 @@ if ($count == 0) {
   $html->addBodyContent($result_msg);
   $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>");
   if (($nofail == "no") || (!$spatne)) {
-    $html->addBodyContent('<h1>'. $priklad->name. '</h1>');
+    $html->addBodyContent('<h1>'. $priklad->getName(). '</h1>');
   }
   $html->addBodyContent('<form method="post">');
   $html->addBodyContent($priklad->toHTML());

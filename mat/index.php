@@ -81,7 +81,7 @@ foreach ($_POST as $key => $val) {
 if ( $count == null ) { 
   include 'include/init.php';
   //$count = POCATECNI_POCET; 
-  $html->addBodyContent('<p class="footer">MAT info a licence: <a href="https://github.com/buralien/mat">GitHub</a></p>');
+  include 'include/footer.php';
   $html->display();
   die();
 } elseif ($level->solved == 0) {
@@ -158,7 +158,7 @@ if ((time() - $starttime > 2) || ($level->solved > 0)) {
   $html->addBodyContent(' ('. $level->name. ')');
   $html->addBodyContent(' za <span class="time">'. sayTime($starttime). '</span>.</p>');
 }
-$html->addBodyContent('<p class="footer">MAT info a licence: <a href="https://github.com/buralien/mat">GitHub</a></p>');
+include 'include/footer.php';
 
 $html->display();
 ?>

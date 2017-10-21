@@ -194,7 +194,7 @@ class EnglishTextElement extends FormulaElement {
   public function toHTML() {
     return '<span class="primitive">'. $this->sayNumber($this->element). '</span>';
   }
-    
+
   private function sayNumber($number) {
     switch ($number) {
       case 0: return 'zero';
@@ -246,11 +246,144 @@ class EnglishTextElement extends FormulaElement {
           }
           $number %= 10;
           if ($number > 0) $text[] = $this->sayNumber($number);
-        } 
+        }
         return implode(' ', $text);
-    } 
+    }
+  }
+} // class EnglishTextElement
+
+class PhysicsElement extends FormulaElement {
+  public $baseunit;
+  protected $element;
+  protected $prefix;
+  public static $unitlist = array('m', 'g', 's', 'A', 'K', 'mol', 'cd');
+  public static $prefixmap = array(
+        'T' => 12,
+        'G' => 9,
+        'M' => 6,
+        'k' => 3,
+        'h' => 2,
+        'da' => 1,
+        'xxx' => 0,
+        'd' => -1,
+        'c' => -2,
+        'm' => -3,
+        'u' => -6,
+        'n' => -9
+      );
+
+  function __construct($value) {
+    $data = explode(' ', $value);
+    $this->element = intval($data[0]);
+    $name = $data[1];
+    foreach (array_keys(static::$prefixmap) as $prefix) {
+    #foreach(static::$unitlist as $unit) {
+      if (strpos($name, $prefix) !== False) {
+        $this->prefix = $prefix;
+        $name = substr($name, strlen($prefix));
+        break;
+      }
+    }
+    $this->baseunit = $name;
   }
 
-}
+  public static function getPrefix($power) {
+    foreach (static::$prefixmap as $prefix => $value) {
+      if ($power <= $value) return $prefix;
+    }
+    return null;
+  }
+
+  public static function maxpower() {
+    return static::$prefixmap[0];
+  }
+  public static function minpower() {
+    return end(static::$prefixmap);
+  }
+  public static function maxprefix() {
+    return array_keys(static::$prefixmap)[0];
+  }
+  public static function minprefix() {
+    return end(array_keys(static::$prefixmap));
+  }
+
+  public static function getPower($prefix) {
+    if (isset(static::$prefixmap[$prefix])) {
+      return static::$prefixmap[$prefix];
+    } else {
+      return null;
+    }
+  }
+
+  public function getValue($prefix = null) {
+    if (in_array($prefix, array_keys(static::$prefixmap))) {
+      $diffpower = static::getPower($this->prefix) - static::getPower($prefix);
+      return $this->element * pow(10, $diffpower);
+    } else {
+      return $this->element;
+    }
+  }
+  public function toStr($prefix = null) {
+    if (in_array($prefix, array_keys(static::$prefixmap))) {
+      return $this->getValue($prefix). ' '. str_replace('xxx', '', $prefix). $this->baseunit;
+    } else {
+      return $this->getValue($this->prefix). ' '. str_replace('xxx', '', $this->prefix). $this->baseunit;
+      #return ($this->getValue($prefix) / pow(10, static::$prefixmap[$prefix])). ' '. $prefix. $this->baseunit;
+    }
+
+  }
+  public function toHTML($prefix = null) {
+    return '<span class="primitive">' . str_replace('u', '&micro;', $this->toStr($prefix)). '</span>';
+  }
+} // class PhysicsElement
+
+class RandomPhysicsElement extends PhysicsElement {
+  function __construct($maxprefix = null, $units = null) {
+    if (in_array($maxprefix, array_keys(static::$prefixmap))) {
+      $maxpower = static::getPower($maxprefix);
+      $this->prefix = $maxprefix;
+    } else {
+      $maxpower = static::maxpower();
+      $this->prefix = static::maxprefix();
+    }
+    $this->element = mt_rand(1, 10);
+    if (is_array($units)) {
+      $this->baseunit = $units[mt_rand(0, (count($units)-1))];
+    } else {
+      $this->baseunit = $this->randomUnit();
+    }
+  }
+
+  public static function randomPower($minpower, $maxpower) {
+    $options = array();
+    foreach (static::$prefixmap as $prefix => $power) {
+      if (($power >= $minpower) && ($power <= $maxpower)) {
+        $options[$prefix] = $power;
+      }
+    }
+    $max = (count($options) - 1);
+    return array_values($options)[mt_rand(0, $max)];
+  }
+
+  public static function randomPrefix($minprefix = null, $maxprefix = null) {
+    if ($minprefix === null) $minprefix == static::minprefix();
+    if ($maxprefix === null) $maxprefix == static::maxprefix();
+
+    $options = array();
+    $minpower = static::getPower($minprefix);
+    $maxpower = static::getPower($maxprefix);
+    foreach (static::$prefixmap as $prefix => $power) {
+      if (($power >= $minpower) && ($power <= $maxpower)) {
+        $options[] = $prefix;
+      }
+    }
+    $max = (count($options) - 1);
+    return $options[mt_rand(0, $max)];
+  }
+
+  public static function randomUnit() {
+    return static::$unitlist[mt_rand(0, (count(static::$unitlist) - 1))];
+  }
+} // class RandomPhysicsElement
 
 ?>

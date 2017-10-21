@@ -128,6 +128,7 @@ class FormulaLevel4a extends GenericLevel {
     $this->formulas[] = new FormulaWeight('MalaNasobilka', array(10, 3));
     $this->formulas[] = new FormulaWeight('DeleniSeZbytkem', array(99));
     $this->formulas[] = new FormulaWeight('SimpleBracketFormula', array(100));
+    $this->formulas[] = new FormulaWeight('PrevodJednotek', array('k', 'm', 1000, array('m', 'l')));
   }
 }
 
@@ -143,7 +144,7 @@ class FormulaLevelNasobilka extends GenericLevel {
 
 class FormulaLevelAnglictina extends GenericLevel {
   function __construct() {
-    $this->name = 'Angli&ccaron;tina';
+    $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky';
     $this->formulas = array();
     $this->formulas[] = new FormulaWeight('EnglishTextFormula', array(100), 500);
     $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array(100));

@@ -568,4 +568,82 @@ class ReverseEnglishTextFormula extends Formula {
   }
 }
 
+class PrevodJednotek extends Formula {
+  public static $name = 'P&rcaron;evod jednotek';
+  private $element;
+  private $sourceprefix;
+  private $targetprefix;
+
+  function __construct($maxprefix = null, $minprefix = null, $maxvalue = 100, $units = null) {
+
+    # Generate source and target prefixes
+    $prefix1 = RandomPhysicsElement::randomPrefix($minprefix, $maxprefix);
+    do {
+      $prefix2 = RandomPhysicsElement::randomPrefix($minprefix, $maxprefix);
+    } while ((pow(10, abs(PhysicsElement::getPower($prefix1) - PhysicsElement::getPower($prefix2))) > $maxvalue) || ($prefix1 == $prefix2));
+
+    # Choose direction
+    if (mt_rand(0,1) > 0) {
+      $this->sourceprefix = $prefix1;
+      $this->targetprefix = $prefix2;
+    } else {
+      $this->targetprefix = $prefix1;
+      $this->sourceprefix = $prefix2;
+    }
+
+    # Generate the value (number)
+    if (PhysicsElement::getPower($this->sourceprefix) > PhysicsElement::getPower($this->targetprefix)) {
+      $value = mt_rand(1,10);
+    } else {
+      $minvalue = pow(10, floor(log10($maxvalue)));
+      $value = mt_rand($minvalue, $maxvalue);
+    }
+
+    # Generate the base SI unit
+    if (is_array($units)) {
+      $index = mt_rand(0, (count($units) - 1));
+      echo "Picked ". $index. "\n";
+      $baseunit = $units[$index];
+    } else {
+      $baseunit = RandomPhysicsElement::randomUnit();
+    }
+
+    # Build the element
+    $name = $value. ' '. $this->sourceprefix. $baseunit;
+    echo "$name\n";
+    $this->element = new PhysicsElement($name);
+    print_r($this->element);
+  }
+
+  public function getResult() {
+    return $this->element->toStr();
+  }
+
+  public function toStr($result = FALSE) {
+    $text = $this->element->toStr($this->sourceprefix);
+    if ($result) {
+      $text .= ' == '. $this->element->toStr($this->targetprefix);
+    }
+    return $text;
+  }
+
+  public function toHTML($result = False) {
+    $text = '<span class="formula">'. $this->element->toHTML($this->sourceprefix);
+    $text .= '&nbsp;= ';
+    if ($result) {
+      $text .= '<span class="result">'. $this->element->toHTML($this->targetprefix). '</span>';
+    }
+    $text .= '</span>';
+    return $text;
+  }
+
+  public function getResultHTMLForm() {
+    return '<input type="number" class="result" name="result1" autocomplete="off" autofocus />&nbsp;'. $this->targetprefix. $this->element->baseunit;
+  }
+
+  public function validateResult($input) {
+    return ($input == $this->element->getValue($this->targetprefix));
+  }
+}
+
 ?>

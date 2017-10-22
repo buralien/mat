@@ -19,6 +19,9 @@ abstract class Formula {
       return ( intval($input) == $this->getResult() );
     }
   }
+  public function getName() {
+    return static::$name;
+  }
   public function voiceEnabled() { return false; }
 } // class Formula
 
@@ -521,7 +524,10 @@ class EnglishTextFormula extends Formula {
     $text .= '</span>';
     return $text;
   }
-}
+  public function getResultHTMLForm() {
+    return '<input type="number" class="result" name="result1" autofocus /> (napi&scaron; &ccaron;&iacute;slo)';
+  }
+} // class EnglishTextFormula
 
 class ReverseEnglishTextFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (z &ccaron;&iacute;sel)';
@@ -549,7 +555,7 @@ class ReverseEnglishTextFormula extends EnglishTextFormula {
   }
 
   public function getResultHTMLForm() {
-    return '<input type="text" class="result" name="result1" autocomplete="off" autofocus />';
+    return '<input type="text" class="result" name="result1" autocomplete="off" autofocus /> (napi&scaron; slovy)';
   }
 
   public function validateResult($input) {
@@ -557,25 +563,41 @@ class ReverseEnglishTextFormula extends EnglishTextFormula {
     $input = strtolower($input);
     return ( $this->getResult() == $input );
   }
-}
+} // class ReverseEnglishTextFormula
 
-class EnglishSpeechFormula extends ReverseEnglishTextFormula {
-  public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t)';
+class EnglishSpeechFormula extends EnglishTextFormula {
+  public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - &ccaron;&iacute;sla)';
 
   public function voiceEnabled() { return true; }
 
   public function toHTML($result = FALSE) {
-    $text = '<span class="formula">';
-    $text .= "<input onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\");' type='button' value='Poslech' />";
-    $text .= ' ';
     if ($result) {
-      $text .= '<span class="result">'. $this->element->toHTML(). '</span>';
+      return parent::toHTML(true);
+    } else {
+      $text = '<span class="formula">';
+      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\", \"UK English Male\", {rate: 0.6, volume: 1});document.forms[0].elements[1].focus();' type='button' value='Poslech' />";
+      $text .= '</span>';
+      return $text;
     }
-    $text .= '</span>';
-    return $text;
   }
+} // class EnglishSpeechFormula
 
-}
+class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
+  public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - slova)';
+
+  public function voiceEnabled() { return true; }
+
+  public function toHTML($result = FALSE) {
+    if ($result) {
+      return parent::toHTML(true);
+    } else {
+      $text = '<span class="formula">';
+      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\", \"UK English Male\", {rate: 0.6, volume: 1});document.forms[0].elements[1].focus();' type='button' value='Poslech' />";
+      $text .= '</span>';
+      return $text;
+    }
+  }
+} // class ReverseEnglishSpeechFormula
 
 class PrevodJednotek extends Formula {
   public static $name = 'P&rcaron;evod jednotek';
@@ -646,7 +668,6 @@ class PrevodJednotek extends Formula {
   public function getResultHTMLForm() {
     return '<input type="number" class="result" name="result1" autocomplete="off" autofocus />&nbsp;<span class="formula">'. str_replace('xxx', '', $this->targetprefix). $this->element->baseunit. '</span>';
   }
-
-}
+}  // class PrevodJednotek
 
 ?>

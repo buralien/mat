@@ -1,10 +1,24 @@
 <?php
+session_start() or die("Failed to start sessions!");
+if (isset($_GET['startover'])) {
+  session_destroy();
+  $_SESSION = array();
+  header("HTTP/1.1 303 See Other");
+  header('Location: ?');
+  die();
+}
+header("Cache-Control: no-store, no-cache, must-revalidate"); // HTTP/1.1
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+header("Pragma: no-cache"); // HTTP/1.0
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
 
 define('POCATECNI_POCET', 10);
 define('PRIDAT_ZA_CHYBU', 2);
+define('MAT_DEBUG', 0);
 
 $levels = array(
   'FormulaLevel1',
@@ -51,46 +65,59 @@ $favicon = <<<FAVICON
 data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAJAAAAFgAAABoAAAAaAAAAGgAAABoAAAAaAAAAGgAAABoAAAAaAAAAGgAAABoAAAAaAAAAGgAAABYAAAAJAAAAEgEOADMCSgCDAl0AvAJdAMwCXQDMAl0AzAJdAMwCXQDMAl0AzAJdAMwCXQDMAl0AvAJKAIMBDgAzAAAAEgIdAAAGbQBzEpII3SDMEPki2RH/ItkR/yLZEf8i2RH/ItkR/yLZEf8i2RH/ItkR/x/MD/kQkgfdBm0AcwIdAAAKfQAACn0AuiXKFfki0RH/ItER/yLREf8i0RH/IrYR/yK2Ef8i0RH/ItER/yLREf8i0RH/IMgP+Qp9ALoKfQAADIQAAAyEAMwrzBr/IsgR/yLIEf8iyBH/IrwR/+jo6P/s7Oz/IrwR/yLIEf8iyBH/IsgR/yLIEf8MhADMDIQAAA2JAAANiQDMMcYg/yK+Ef8ivhH/Ir4R/yK1Ef/k5OT/6Ojo/yK1Ef8ivhH/Ir4R/yK+Ef8jvhL/DYkAzA2JAAAOjQAADo0AzEHDMP8jtBL/IqgR/yKoEf8ipBH/4ODg/+Tk5P8ipBH/IqgR/yKoEf8itBH/JbUU/w6NAMwOjQAAD5IAAA+SAMxSyUH/M68i/9TU1P/T09P/19fX/9zc3P/g4OD/5OTk/+jo6P/s7Oz/IqYR/yivF/8PkgDMD5IAABCWAAAQlgDMVcxE/zyzK//4+Pj/4eHh/9XV1f/X19f/3Nzc/+Dg4P/k5OT/6Ojo/yKgEf8sqhv/EJYAzBCWAAARmgAAEZoAzFrRSf9Hvjb/PrUt/z61Lf83rib/6+vr/+Li4v8lnRT/I5sS/yObEv8nnxb/ObEo/xGaAMwRmgAAEp4AABKeAMxg10//TsU9/07FPf9OxT3/RLsz////////////RLsz/07FPf9OxT3/TsU9/1jPR/8SngDMEp4AABOiAAATogDMZ95W/1fORv9Xzkb/V85G/0rBOf///////////0rBOf9Xzkb/V85G/1fORv9g10//E6IAzBOiAAAUpQAAFKUAumTeU/lf1k7/X9ZO/1/WTv9f1k7/UMc//1DHP/9f1k7/X9ZO/1/WTv9f1k7/YNpP+RSlALoUpQAAFKgAABSoAHM3wSTdZuBU+W7lXf9u5V3/buVd/27lXf9t5Fz/beRc/23kXP9t5Fz/ZN9T+Ta/I90UqABzFKgAABSoAAAVqQAMFaoAcxWqALoVqgDMFaoAzBWqAMwVqgDMFaoAzBWqAMwVqgDMFaoAzBWqALoVqgBzFakADBSoAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A//8AAMADAADAAwAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAMADAADgBwAA//8AAA==
 FAVICON;
 $html->addHeadLink($favicon, 'icon');
-$level = new FormulaLevelNasobilka();
+if (MAT_DEBUG) $html->addBodyContent(print_r($_SESSION, true));
+if (MAT_DEBUG) $html->addBodyContent(print_r($_POST, true));
 
-$elements = array();
-$operators = array();
+if (isset($_SESSION['level'])) {
+  $level = decryptObject($_SESSION['level']);
+  $level->solved += 1;
+} else {
+  $level = new FormulaLevelNasobilka();
+}
+if (isset($_SESSION['priklad'])) {
+  $check = decryptObject($_SESSION['priklad']);
+} else {
+  $check = null;
+}
+if (isset($_SESSION['starttime'])) {
+  $starttime = intval($_SESSION['starttime']);
+} else {
+  $starttime = $starttime = time();
+}
+if (isset($_SESSION['countleft'])) {
+  $count = intval($_SESSION['countleft']);
+} else {
+  $count = null;
+}
+if (isset($_SESSION['nofail'])) {
+  $nofail = $_SESSION['nofail'];
+} else {
+  $nofail = "no";
+}
+
 $results = array();
-$count = null;
-$starttime = null;
-$nofail = "no";
-$check = null;
-// $html->addBodyContent(print_r($_POST, TRUE));
 foreach ($_POST as $key => $val) {
-  if (is_numeric($val)) {
-    if (strpos($key, 'result') === 0) $results[$key] = intval($val);
-    if ($key == 'countleft') $count = $val;
-    if ($key == 'starttime') $starttime = $val;
-    if ($key == 'init_level') {
-      $clsid = $levels[intval($val)];
-      $level = new $clsid();
-    }
-  } else {
-    if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
-    if ($key == 'nofail') $nofail = htmlspecialchars($val);
-    if ($key == 'formula' ) $check = decryptObject($val);
-    if ($key == 'level' ) {
-      $level = decryptObject($val);
-      $level->solved += 1;
-    }
+  if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
+  if (($key == 'nofail') && ($value == 'yes')) $nofail = 'yes';
+  if (($key == 'countleft') && (is_numeric($val))) $count = intval($val);
+  if (($key == 'init_level') && (is_numeric($val))) {
+    $clsid = $levels[intval($val)];
+    $level = new $clsid();
+    if (MAT_DEBUG) $html->addBodyContent("Created level $clsid");
+    if (MAT_DEBUG) $html->addBodyContent(print_r($level, true));
   }
 }
 
-if ( $count == null ) {
+if (( $count == null ) || (isset($_GET['startover']))) {
+  session_destroy();
+  $_SESSION = array();
   include 'include/init.php';
-  //$count = POCATECNI_POCET;
   include 'include/footer.php';
   $html->display();
   die();
 } elseif ($level->solved == 0) {
   $level->max_formulas = $count;
 }
-if ( $starttime == null ) { $starttime = time(); }
 
 $spatne = FALSE;
 $priklad = null;
@@ -111,7 +138,6 @@ if ($check !== null) {
     $result_msg = '<h2 class="success">Spr&aacute;vn&ecaron;!</h2>';
   } else {
     // Spatne
-
     if ($count < $level->max_formulas) { $count += min(PRIDAT_ZA_CHYBU, ($level->max_formulas - $count)); }
     $spatne=TRUE;
     $level->addWeight(get_class($check));
@@ -130,13 +156,19 @@ if ($priklad === null) {
     $html->addScript('https://code.responsivevoice.org/responsivevoice.js');
   }
 }
+$_SESSION['nofail'] = $nofail;
+$_SESSION['countleft'] = $count;
+$_SESSION['starttime'] = $starttime;
+$_SESSION['level'] = encryptObject($level);
+$_SESSION['priklad'] = encryptObject($priklad);
+session_write_close();
 
 $html->setTitle('MAT');
 // $html->addBodyContent('<pre>'. print_r($priklad, TRUE). '</pre>');
 
 if ($count == 0) {
   $html->addBodyContent('<h2 class="success">Hotovo!</h2>');
-  $html->addBodyContent('<a href="?">Znova</a>');
+  $html->addBodyContent('<a href="?startover=1">Znova</a>');
 } else {
   $html->addBodyContent($result_msg);
   $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>");
@@ -146,10 +178,6 @@ if ($count == 0) {
   $html->addBodyContent('<form method="post">');
   $html->addBodyContent($priklad->toHTML());
   $html->addBodyContent($priklad->getResultHTMLForm());
-  $html->addBodyContent('<input type="hidden" name="countleft" value="'. $count. '" />');
-  $html->addBodyContent('<input type="hidden" name="starttime" value="'. $starttime. '" />');
-  $html->addBodyContent('<input type="hidden" name="formula" value="'. encryptObject($priklad). '" />');
-  $html->addBodyContent('<input type="hidden" name="level" value="'. encryptObject($level). '" />');
   $html->addBodyContent('<input type="submit" value="Hotovo">');
   $html->addBodyContent('<input type="hidden" name="nofail" value="'. $nofail. '" />');
   $html->addBodyContent('</form>');

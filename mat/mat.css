@@ -39,6 +39,17 @@ input[type=number] {
   width: 4em;
 }
 
+.speech {
+  border: none;
+  color: white;
+  margin: 16px;
+  padding: 8px;
+  background-color: darkblue;
+  text-align: center;
+  text-decoration: none;
+  font-size: 20px;
+}
+
 h2.success {
   color: green;
 }

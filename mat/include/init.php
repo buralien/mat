@@ -8,9 +8,9 @@ $html->addBodyContent('<form method="post">');
 
 foreach ($levels as $id => $clsid) {
   $l = new $clsid();
-  $html->addBodyContent('<input type="radio" name="init_level" value="'. $id. '" />');
+  $html->addBodyContent('<label><input type="radio" name="init_level" value="'. $id. '" />');
   $html->addBodyContent('<span class="lvl_name">'. $l->name. '</span><br />');
-  $html->addBodyContent('<span class="lvl_desc">'. $l->getDescription(). '</span><br />');
+  $html->addBodyContent('<span class="lvl_desc">'. $l->getDescription(). '</span></label><br />');
 }
 unset($l);
 $html->addBodyContent('<label><input type="number" name="countleft" value="'. POCATECNI_POCET. '" />&nbsp;p&rcaron;&iacute;klad&uring;</label>');

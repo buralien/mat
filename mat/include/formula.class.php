@@ -19,6 +19,9 @@ abstract class Formula {
       return ( intval($input) == $this->getResult() );
     }
   }
+  public function getName() {
+    return static::$name;
+  }
   public function voiceEnabled() { return false; }
 } // class Formula
 

@@ -16,9 +16,8 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
 
-define('POCATECNI_POCET', 10);
-define('PRIDAT_ZA_CHYBU', 2);
 define('MAT_DEBUG', 0);
+define('POCATECNI_POCET', 10);
 
 $levels = array(
   'FormulaLevel1',
@@ -27,7 +26,8 @@ $levels = array(
   'FormulaLevel3b',
   'FormulaLevel4a',
   'FormulaLevelNasobilka',
-  'FormulaLevelAnglictina'
+  'FormulaLevelAnglictina',
+  'FormulaLevelAnglictinaNoSound'
   );
 
 function sayTime($timestamp) {
@@ -84,6 +84,11 @@ if (isset($_SESSION['starttime'])) {
 } else {
   $starttime = $starttime = time();
 }
+if (isset($_SESSION['difficulty'])) {
+  $difficulty = intval($_SESSION['difficulty']);
+} else {
+  $difficulty = 2;
+}
 if (isset($_SESSION['countleft'])) {
   $count = intval($_SESSION['countleft']);
 } else {
@@ -100,6 +105,7 @@ foreach ($_POST as $key => $val) {
   if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
   if (($key == 'nofail') && ($value == 'yes')) $nofail = 'yes';
   if (($key == 'countleft') && (is_numeric($val))) $count = intval($val);
+  if (($key == 'difficulty') && (is_numeric($val))) $difficulty = intval($val);
   if (($key == 'init_level') && (is_numeric($val))) {
     $clsid = $levels[intval($val)];
     $level = new $clsid();
@@ -138,7 +144,7 @@ if ($check !== null) {
     $result_msg = '<h2 class="success">Spr&aacute;vn&ecaron;!</h2>';
   } else {
     // Spatne
-    if ($count < $level->max_formulas) { $count += min(PRIDAT_ZA_CHYBU, ($level->max_formulas - $count)); }
+    if ($count < $level->max_formulas) { $count += min($difficulty, ($level->max_formulas - $count)); }
     $spatne=TRUE;
     $level->addWeight(get_class($check));
     $result_msg = '<h2 class="fail">&Scaron;patn&ecaron;!</h2>';
@@ -159,6 +165,7 @@ if ($priklad === null) {
 $_SESSION['nofail'] = $nofail;
 $_SESSION['countleft'] = $count;
 $_SESSION['starttime'] = $starttime;
+$_SESSION['difficulty'] = $difficulty;
 $_SESSION['level'] = encryptObject($level);
 $_SESSION['priklad'] = encryptObject($priklad);
 session_write_close();

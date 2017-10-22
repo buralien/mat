@@ -1,4 +1,5 @@
 <?php
+session_start() or die("Failed to start sessions!");
 
 require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
@@ -47,46 +48,54 @@ function decryptObject($text) {
 
 $html = new HTML_Page2();
 $html->addStyleSheet('mat.css');
-$level = new FormulaLevelNasobilka();
 
-$elements = array();
-$operators = array();
+if (isset($_SESSION['level'])) {
+  $level = decryptObject($_SESSION['level']);
+  $level->solved += 1;
+} else {
+  $level = new FormulaLevelNasobilka();
+}
+if (isset($_SESSION['priklad'])) {
+  $check = decryptObject($_SESSION['priklad']);
+} else {
+  $check = null;
+}
+if (isset($_SESSION['starttime'])) {
+  $starttime = intval($_SESSION['starttime']);
+} else {
+  $starttime = $starttime = time();
+}
+if (isset($_SESSION['countleft'])) {
+  $count = intval($_SESSION['countleft']);
+} else {
+  $count = null;
+}
+if (isset($_SESSION['nofail'])) {
+  $nofail = intval($_SESSION['nofail']);
+} else {
+  $nofail = "no";
+}
+
 $results = array();
-$count = null;
-$starttime = null;
-$nofail = "no";
-$check = null;
 // $html->addBodyContent(print_r($_POST, TRUE));
 foreach ($_POST as $key => $val) {
-  if (is_numeric($val)) {
-    if (strpos($key, 'result') === 0) $results[$key] = intval($val);
-    if ($key == 'countleft') $count = $val;
-    if ($key == 'starttime') $starttime = $val;
-    if ($key == 'init_level') {
-      $clsid = $levels[intval($val)];
-      $level = new $clsid();
-    }
-  } else {
-    if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
-    if ($key == 'nofail') $nofail = htmlspecialchars($val);
-    if ($key == 'formula' ) $check = decryptObject($val);
-    if ($key == 'level' ) {
-      $level = decryptObject($val);
-      $level->solved += 1;
-    }
+  if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
+  if (($key == 'nofail') && ($value == 'yes')) $nofail = 'yes';
+  if (($key == 'countleft') && (is_numeric($val))) $countleft = intval($val);
+  if (($key == 'init_level') && (is_numeric($val))) {
+    $clsid = $levels[intval($val)];
+    $level = new $clsid();
   }
 }
 
-if ( $count == null ) { 
+if ( $count == null ) {
   include 'include/init.php';
-  //$count = POCATECNI_POCET; 
   include 'include/footer.php';
   $html->display();
   die();
 } elseif ($level->solved == 0) {
   $level->max_formulas = $count;
 }
-if ( $starttime == null ) { $starttime = time(); }
 
 $spatne = FALSE;
 $priklad = null;
@@ -107,7 +116,6 @@ if ($check !== null) {
     $result_msg = '<h2 class="success">Spr&aacute;vn&ecaron;!</h2>';
   } else {
     // Spatne
-
     if ($count < $level->max_formulas) { $count += min(PRIDAT_ZA_CHYBU, ($level->max_formulas - $count)); }
     $spatne=TRUE;
     $level->addWeight(get_class($check));
@@ -126,6 +134,12 @@ if ($priklad === null) {
     $html->addScript('https://code.responsivevoice.org/responsivevoice.js');
   }
 }
+$_SESSION['nofail'] = $nofail;
+$_SESSION['countleft'] = $count;
+$_SESSION['starttime'] = $starttime;
+$_SESSION['level'] = encryptObject($level);
+$_SESSION['priklad'] = encryptObject($priklad);
+session_write_close();
 
 $html->setTitle('MAT');
 // $html->addBodyContent('<pre>'. print_r($priklad, TRUE). '</pre>');
@@ -142,10 +156,6 @@ if ($count == 0) {
   $html->addBodyContent('<form method="post">');
   $html->addBodyContent($priklad->toHTML());
   $html->addBodyContent($priklad->getResultHTMLForm());
-  $html->addBodyContent('<input type="hidden" name="countleft" value="'. $count. '" />');
-  $html->addBodyContent('<input type="hidden" name="starttime" value="'. $starttime. '" />');
-  $html->addBodyContent('<input type="hidden" name="formula" value="'. encryptObject($priklad). '" />');
-  $html->addBodyContent('<input type="hidden" name="level" value="'. encryptObject($level). '" />');
   $html->addBodyContent('<input type="submit" value="Hotovo">');
   $html->addBodyContent('<input type="hidden" name="nofail" value="'. $nofail. '" />');
   $html->addBodyContent('</form>');

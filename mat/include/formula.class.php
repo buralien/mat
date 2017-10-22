@@ -575,7 +575,7 @@ class EnglishSpeechFormula extends EnglishTextFormula {
       return parent::toHTML(true);
     } else {
       $text = '<span class="formula">';
-      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\");' type='button' value='Poslech' />";
+      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\", \"UK English Male\", {rate: 0.6, volume: 1});document.forms[0].elements[1].focus();' type='button' value='Poslech' />";
       $text .= '</span>';
       return $text;
     }
@@ -592,7 +592,7 @@ class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
       return parent::toHTML(true);
     } else {
       $text = '<span class="formula">';
-      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\");' type='button' value='Poslech' />";
+      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\", \"UK English Male\", {rate: 0.6, volume: 1});document.forms[0].elements[1].focus();' type='button' value='Poslech' />";
       $text .= '</span>';
       return $text;
     }

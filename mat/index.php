@@ -4,7 +4,6 @@ require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
 
 define('POCATECNI_POCET', 10);
-define('POCATECNI_OBTIZNOST', 12);
 define('PRIDAT_ZA_CHYBU', 2);
 
 $levels = array(
@@ -122,6 +121,9 @@ if ($check !== null) {
 
 if ($priklad === null) {
   $priklad = $level->getFormula();
+  if ($priklad->voiceEnabled()) {
+    $html->addScript('https://code.responsivevoice.org/responsivevoice.js');
+  }
 }
 
 $html->setTitle('MAT');

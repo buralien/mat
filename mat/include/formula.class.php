@@ -19,6 +19,7 @@ abstract class Formula {
       return ( intval($input) == $this->getResult() );
     }
   }
+  public function voiceEnabled() { return false; }
 } // class Formula
 
 class SimpleFormula extends Formula {
@@ -491,7 +492,7 @@ class SimpleBracketFormula extends SimpleFormula {
 
 class EnglishTextFormula extends Formula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky';
-  private $element;
+  protected $element;
 
   function __construct($max = 100, $min = 0) {
     if ($min < 0) $min = 0;
@@ -522,15 +523,8 @@ class EnglishTextFormula extends Formula {
   }
 }
 
-class ReverseEnglishTextFormula extends Formula {
+class ReverseEnglishTextFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (z &ccaron;&iacute;sel)';
-  private $element;
-
-  function __construct($max = 100, $min = 0) {
-    if ($min < 0) $min = 0;
-    if ($max < $min) $max = $min;
-    $this->element = new EnglishTextElement(mt_rand($min, $max));
-  }
 
   public function getResult() {
     return $this->element->toStr();
@@ -563,6 +557,24 @@ class ReverseEnglishTextFormula extends Formula {
     $input = strtolower($input);
     return ( $this->getResult() == $input );
   }
+}
+
+class EnglishSpeechFormula extends ReverseEnglishTextFormula {
+  public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t)';
+
+  public function voiceEnabled() { return true; }
+
+  public function toHTML($result = FALSE) {
+    $text = '<span class="formula">';
+    $text .= "<input onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\");' type='button' value='Poslech' />";
+    $text .= ' ';
+    if ($result) {
+      $text .= '<span class="result">'. $this->element->toHTML(). '</span>';
+    }
+    $text .= '</span>';
+    return $text;
+  }
+
 }
 
 class PrevodJednotek extends Formula {

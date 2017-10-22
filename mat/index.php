@@ -1,11 +1,19 @@
 <?php
 session_start() or die("Failed to start sessions!");
+if (isset($_GET['startover'])) {
+  session_destroy();
+  $_SESSION = array();
+  header("HTTP/1.1 303 See Other");
+  header('Location: ?');
+  die();
+}
 
 require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
 
 define('POCATECNI_POCET', 10);
 define('PRIDAT_ZA_CHYBU', 2);
+define('MAT_DEBUG', 0);
 
 $levels = array(
   'FormulaLevel1',
@@ -48,6 +56,8 @@ function decryptObject($text) {
 
 $html = new HTML_Page2();
 $html->addStyleSheet('mat.css');
+if (MAT_DEBUG) $html->addBodyContent(print_r($_SESSION, true));
+if (MAT_DEBUG) $html->addBodyContent(print_r($_POST, true));
 
 if (isset($_SESSION['level'])) {
   $level = decryptObject($_SESSION['level']);
@@ -71,24 +81,27 @@ if (isset($_SESSION['countleft'])) {
   $count = null;
 }
 if (isset($_SESSION['nofail'])) {
-  $nofail = intval($_SESSION['nofail']);
+  $nofail = $_SESSION['nofail'];
 } else {
   $nofail = "no";
 }
 
 $results = array();
-// $html->addBodyContent(print_r($_POST, TRUE));
 foreach ($_POST as $key => $val) {
   if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
   if (($key == 'nofail') && ($value == 'yes')) $nofail = 'yes';
-  if (($key == 'countleft') && (is_numeric($val))) $countleft = intval($val);
+  if (($key == 'countleft') && (is_numeric($val))) $count = intval($val);
   if (($key == 'init_level') && (is_numeric($val))) {
     $clsid = $levels[intval($val)];
     $level = new $clsid();
+    if (MAT_DEBUG) $html->addBodyContent("Created level $clsid");
+    if (MAT_DEBUG) $html->addBodyContent(print_r($level, true));
   }
 }
 
-if ( $count == null ) {
+if (( $count == null ) || (isset($_GET['startover']))) {
+  session_destroy();
+  $_SESSION = array();
   include 'include/init.php';
   include 'include/footer.php';
   $html->display();
@@ -146,7 +159,7 @@ $html->setTitle('MAT');
 
 if ($count == 0) {
   $html->addBodyContent('<h2 class="success">Hotovo!</h2>');
-  $html->addBodyContent('<a href="?">Znova</a>');
+  $html->addBodyContent('<a href="?startover=1">Znova</a>');
 } else {
   $html->addBodyContent($result_msg);
   $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>");

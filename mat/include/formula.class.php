@@ -473,7 +473,7 @@ class SimpleBracketFormula extends SimpleFormula {
     if ($max == 0) {
       $max = mt_getrandmax();
     } else {
-      $this::$name .= ' do '. $max;
+      self::$name .= ' do '. $max;
     }
     $this->EXCLUDE_NUMBERS = array(0);
     $this->LOW_PROBABILITY = array(1, 10);
@@ -611,7 +611,6 @@ class PrevodJednotek extends Formula {
     # Generate the base SI unit
     if (is_array($units)) {
       $index = mt_rand(0, (count($units) - 1));
-      echo "Picked ". $index. "\n";
       $baseunit = $units[$index];
     } else {
       $baseunit = RandomPhysicsElement::randomUnit();
@@ -619,13 +618,11 @@ class PrevodJednotek extends Formula {
 
     # Build the element
     $name = $value. ' '. $this->sourceprefix. $baseunit;
-    echo "$name\n";
     $this->element = new PhysicsElement($name);
-    print_r($this->element);
   }
 
   public function getResult() {
-    return $this->element->toStr();
+    return $this->element->getValue($this->targetprefix);
   }
 
   public function toStr($result = FALSE) {
@@ -647,12 +644,9 @@ class PrevodJednotek extends Formula {
   }
 
   public function getResultHTMLForm() {
-    return '<input type="number" class="result" name="result1" autocomplete="off" autofocus />&nbsp;'. $this->targetprefix. $this->element->baseunit;
+    return '<input type="number" class="result" name="result1" autocomplete="off" autofocus />&nbsp;<span class="formula">'. str_replace('xxx', '', $this->targetprefix). $this->element->baseunit. '</span>';
   }
 
-  public function validateResult($input) {
-    return ($input == $this->element->getValue($this->targetprefix));
-  }
 }
 
 ?>

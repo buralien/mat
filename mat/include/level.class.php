@@ -22,7 +22,7 @@ class FormulaWeight {
     return $this->formula;
   }
   function addWeight($weight) {
-    $this->weight += $weight;
+    if ($this->weight + $weight > 0) $this->weight += $weight;
     return $this->weight;
   }
   public function getDescription() {
@@ -44,7 +44,7 @@ abstract class GenericLevel {
     foreach ($this->formulas as $frml) {
       $totalweight += $frml->getWeight();
     }
-    if ($totalweight == 0) { return null; }
+    if ($totalweight <= 0) { return null; }
     $pick = mt_rand(0, $totalweight);
     foreach ($this->formulas as $frml) {
       $pick -= $frml->getWeight();

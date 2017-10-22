@@ -13,8 +13,8 @@ foreach ($levels as $id => $clsid) {
   $html->addBodyContent('<span class="lvl_desc">'. $l->getDescription(). '</span><br />');
 }
 unset($l);
-$html->addBodyContent('<input type="number" name="countleft" value="'. POCATECNI_POCET. '" />&nbsp;p&rcaron;&iacute;klad&uring;');
-$html->addBodyContent('<br /><input type="checkbox" name="nofail" value="yes" />&nbsp;Opravovat p&rcaron;&iacute;klady');
+$html->addBodyContent('<label><input type="number" name="countleft" value="'. POCATECNI_POCET. '" />&nbsp;p&rcaron;&iacute;klad&uring;</label>');
+$html->addBodyContent('<br /><label><input type="checkbox" name="nofail" value="yes" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');
 $html->addBodyContent('<br /><input type="submit" class="init" name="init" value="Za&ccaron;&iacute;t" />');
 $html->addBodyContent('</form>');
 

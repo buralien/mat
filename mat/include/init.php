@@ -15,11 +15,11 @@ foreach ($levels as $id => $clsid) {
 unset($l);
 $html->addBodyContent('Obt&iacute;&zcaron;nost:<br />');
 $html->addBodyContent('<label><input type="radio" name="difficulty" value="1" />&nbsp;Lehk&aacute;</label>');
-$html->addBodyContent('<label><input type="radio" name="difficulty" value="2" />&nbsp;Norm&aacute;ln&iacute;</label>');
+$html->addBodyContent('<label><input type="radio" name="difficulty" value="2" checked="checked" />&nbsp;Norm&aacute;ln&iacute;</label>');
 $html->addBodyContent('<label><input type="radio" name="difficulty" value="3" />&nbsp;T&eacute;&zcaron;k&aacute;</label>');
 
 $html->addBodyContent('<br /><label><input type="number" name="countleft" value="'. POCATECNI_POCET. '" />&nbsp;p&rcaron;&iacute;klad&uring;</label>');
-$html->addBodyContent('<br /><label><input type="checkbox" name="nofail" value="yes" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');
+$html->addBodyContent('<br /><label><input type="checkbox" name="nofail" value="yes" checked="checked" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');
 
 $html->addBodyContent('<br /><input type="submit" class="init" name="init" value="Za&ccaron;&iacute;t" />');
 $html->addBodyContent('</form>');

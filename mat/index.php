@@ -1,12 +1,14 @@
 <?php
 session_start() or die("Failed to start sessions!");
 if (isset($_GET['startover'])) {
+  # Destroy saved session data nad start over
   session_destroy();
   $_SESSION = array();
   header("HTTP/1.1 303 See Other");
   header('Location: ?');
   die();
 }
+# Prevent caching of pages
 header("Cache-Control: no-store, no-cache, must-revalidate"); // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -16,9 +18,10 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 require_once 'include/level.class.php';
 require_once 'HTML/Page2.php';
 
-define('MAT_DEBUG', 0);
-define('POCATECNI_POCET', 10);
+define('MAT_DEBUG', 0); # Set to one to see debug output on the page
+define('POCATECNI_POCET', 10); # Default number of formulas to generate
 
+# List of allowed formula levels (see level.class.php)
 $levels = array(
   'FormulaLevel1',
   'FormulaLevel2',
@@ -31,6 +34,7 @@ $levels = array(
   );
 
 function sayTime($timestamp) {
+  # Return the time difference as natural text
   $t = time() - $timestamp;
   $ret = array();
   if ($t % 60 > 0) {
@@ -61,13 +65,17 @@ function decryptObject($text) {
 
 $html = new HTML_Page2();
 $html->addStyleSheet('mat.css');
+
+# Inline favicon.ico
 $favicon = <<<FAVICON
 data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAJAAAAFgAAABoAAAAaAAAAGgAAABoAAAAaAAAAGgAAABoAAAAaAAAAGgAAABoAAAAaAAAAGgAAABYAAAAJAAAAEgEOADMCSgCDAl0AvAJdAMwCXQDMAl0AzAJdAMwCXQDMAl0AzAJdAMwCXQDMAl0AvAJKAIMBDgAzAAAAEgIdAAAGbQBzEpII3SDMEPki2RH/ItkR/yLZEf8i2RH/ItkR/yLZEf8i2RH/ItkR/x/MD/kQkgfdBm0AcwIdAAAKfQAACn0AuiXKFfki0RH/ItER/yLREf8i0RH/IrYR/yK2Ef8i0RH/ItER/yLREf8i0RH/IMgP+Qp9ALoKfQAADIQAAAyEAMwrzBr/IsgR/yLIEf8iyBH/IrwR/+jo6P/s7Oz/IrwR/yLIEf8iyBH/IsgR/yLIEf8MhADMDIQAAA2JAAANiQDMMcYg/yK+Ef8ivhH/Ir4R/yK1Ef/k5OT/6Ojo/yK1Ef8ivhH/Ir4R/yK+Ef8jvhL/DYkAzA2JAAAOjQAADo0AzEHDMP8jtBL/IqgR/yKoEf8ipBH/4ODg/+Tk5P8ipBH/IqgR/yKoEf8itBH/JbUU/w6NAMwOjQAAD5IAAA+SAMxSyUH/M68i/9TU1P/T09P/19fX/9zc3P/g4OD/5OTk/+jo6P/s7Oz/IqYR/yivF/8PkgDMD5IAABCWAAAQlgDMVcxE/zyzK//4+Pj/4eHh/9XV1f/X19f/3Nzc/+Dg4P/k5OT/6Ojo/yKgEf8sqhv/EJYAzBCWAAARmgAAEZoAzFrRSf9Hvjb/PrUt/z61Lf83rib/6+vr/+Li4v8lnRT/I5sS/yObEv8nnxb/ObEo/xGaAMwRmgAAEp4AABKeAMxg10//TsU9/07FPf9OxT3/RLsz////////////RLsz/07FPf9OxT3/TsU9/1jPR/8SngDMEp4AABOiAAATogDMZ95W/1fORv9Xzkb/V85G/0rBOf///////////0rBOf9Xzkb/V85G/1fORv9g10//E6IAzBOiAAAUpQAAFKUAumTeU/lf1k7/X9ZO/1/WTv9f1k7/UMc//1DHP/9f1k7/X9ZO/1/WTv9f1k7/YNpP+RSlALoUpQAAFKgAABSoAHM3wSTdZuBU+W7lXf9u5V3/buVd/27lXf9t5Fz/beRc/23kXP9t5Fz/ZN9T+Ta/I90UqABzFKgAABSoAAAVqQAMFaoAcxWqALoVqgDMFaoAzBWqAMwVqgDMFaoAzBWqAMwVqgDMFaoAzBWqALoVqgBzFakADBSoAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A//8AAMADAADAAwAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAMADAADgBwAA//8AAA==
 FAVICON;
 $html->addHeadLink($favicon, 'icon');
-if (MAT_DEBUG) $html->addBodyContent(print_r($_SESSION, true));
-if (MAT_DEBUG) $html->addBodyContent(print_r($_POST, true));
 
+if (MAT_DEBUG) $html->addBodyContent('Session: <pre>'. print_r($_SESSION, true). '</pre>');
+if (MAT_DEBUG) $html->addBodyContent('POST: <pre>'. print_r($_POST, true). '</pre>');
+
+# Looking for all the different variables passed through SESSION
 if (isset($_SESSION['level'])) {
   $level = decryptObject($_SESSION['level']);
   $level->solved += 1;
@@ -79,42 +87,35 @@ if (isset($_SESSION['priklad'])) {
 } else {
   $check = null;
 }
-if (isset($_SESSION['starttime'])) {
-  $starttime = intval($_SESSION['starttime']);
-} else {
-  $starttime = $starttime = time();
+if (!isset($_SESSION['starttime'])) {
+  $_SESSION['starttime'] = time();
 }
-if (isset($_SESSION['difficulty'])) {
-  $difficulty = intval($_SESSION['difficulty']);
-} else {
-  $difficulty = 2;
+if (!isset($_SESSION['difficulty'])) {
+  $_SESSION['difficulty'] = 2;
 }
-if (isset($_SESSION['countleft'])) {
-  $count = intval($_SESSION['countleft']);
-} else {
-  $count = null;
+if (!isset($_SESSION['countleft'])) {
+  $_SESSION['countleft'] = null;
 }
-if (isset($_SESSION['nofail'])) {
-  $nofail = $_SESSION['nofail'];
-} else {
-  $nofail = "no";
+if (!isset($_SESSION['nofail'])) {
+  $_SESSION['nofail'] = "no";
 }
 
+# Looking for POST values of results and initial setup
 $results = array();
 foreach ($_POST as $key => $val) {
   if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
-  if (($key == 'nofail') && ($value == 'yes')) $nofail = 'yes';
-  if (($key == 'countleft') && (is_numeric($val))) $count = intval($val);
-  if (($key == 'difficulty') && (is_numeric($val))) $difficulty = intval($val);
+  if (($key == 'nofail') && ($val == 'yes')) $_SESSION['nofail'] = 'yes';
+  if (($key == 'countleft') && (is_numeric($val))) $_SESSION['countleft'] = intval($val);
+  if (($key == 'difficulty') && (is_numeric($val))) $_SESSION['difficulty'] = intval($val);
   if (($key == 'init_level') && (is_numeric($val))) {
     $clsid = $levels[intval($val)];
     $level = new $clsid();
-    if (MAT_DEBUG) $html->addBodyContent("Created level $clsid");
-    if (MAT_DEBUG) $html->addBodyContent(print_r($level, true));
+    if (MAT_DEBUG) $html->addBodyContent('Level: <pre>'. print_r($level, true). '</pre>');
   }
 }
 
-if (( $count == null ) || (isset($_GET['startover']))) {
+if ( $_SESSION['countleft'] === null ) {
+  # No setup was done yet, reset SESSION and display the initial page
   session_destroy();
   $_SESSION = array();
   include 'include/init.php';
@@ -122,82 +123,90 @@ if (( $count == null ) || (isset($_GET['startover']))) {
   $html->display();
   die();
 } elseif ($level->solved == 0) {
-  $level->max_formulas = $count;
+  # Set initial count of formulas left on the current level
+  # in case we are on the first one
+  $level->max_formulas = $_SESSION['countleft'];
 }
 
 $spatne = FALSE;
 $priklad = null;
 $result_msg = '';
 if ($check !== null) {
+  # Get the correct solution
   $res = $check->getResult();
   if (!is_array($res)) {
     $res = array($res);
   }
   if (($check instanceof DeleniSeZbytkem) && (!isset($results['result2']))) {
+    # Empty input is considered a zero
     $results['result2'] = 0;
   }
+
   if ($check->validateResult($results)) {
-    // Spravne
-    $count--;
+    # Correct input
+    $_SESSION['countleft']--;
     $level->correct += 1;
     $level->addWeight(get_class($check), -100);
     $result_msg = '<h2 class="success">Spr&aacute;vn&ecaron;!</h2>';
   } else {
-    // Spatne
-    if ($count < $level->max_formulas) { $count += min($difficulty, ($level->max_formulas - $count)); }
+    # Incorrect input
+    if ($_SESSION['countleft'] < $level->max_formulas) { $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft'])); }
     $spatne=TRUE;
-    $level->addWeight(get_class($check));
+    $level->addWeight(get_class($check), 100);
     $result_msg = '<h2 class="fail">&Scaron;patn&ecaron;!</h2>';
-    if ($nofail == "yes") {
+    if ($_SESSION['nofail'] == "yes") {
+      # Repeat the same formula, no solution is shown
       $priklad = $check;
     } else {
+      # Show the correct solution
       $result_msg .= '<p class="correctresult">'. $check->toHTML(TRUE). '</p>';
     }
   }
 }
 
 if ($priklad === null) {
+  # Need to generate a new formula
   $priklad = $level->getFormula();
   if ($priklad->voiceEnabled()) {
     $html->addScript('https://code.responsivevoice.org/responsivevoice.js');
   }
 }
-$_SESSION['nofail'] = $nofail;
-$_SESSION['countleft'] = $count;
-$_SESSION['starttime'] = $starttime;
-$_SESSION['difficulty'] = $difficulty;
 $_SESSION['level'] = encryptObject($level);
 $_SESSION['priklad'] = encryptObject($priklad);
 session_write_close();
 
 $html->setTitle('MAT');
-// $html->addBodyContent('<pre>'. print_r($priklad, TRUE). '</pre>');
+if (MAT_DEBUG) $html->addBodyContent('<pre>'. print_r($priklad, TRUE). '</pre>');
 
-if ($count == 0) {
+if ($_SESSION['countleft'] == 0) {
+  # Successfully solved all formulas
   $html->addBodyContent('<h2 class="success">Hotovo!</h2>');
-  $html->addBodyContent('<a href="?startover=1">Znova</a>');
+  $html->addBodyContent('<a href="?startover=1">Spustit znovu</a>');
 } else {
   $html->addBodyContent($result_msg);
-  $html->addBodyContent("<h2>Zb&yacute;v&aacute; $count p&rcaron;&iacute;klad&uring;</h2>");
-  if (($nofail == "no") || (!$spatne)) {
+  $html->addBodyContent("<h2>Zb&yacute;v&aacute; ". $_SESSION['countleft']. " p&rcaron;&iacute;klad&uring;</h2>");
+  if (($_SESSION['nofail'] == "no") || (!$spatne)) {
     $html->addBodyContent('<h1>'. $priklad->getName(). '</h1>');
   }
   $html->addBodyContent('<form method="post">');
   $html->addBodyContent($priklad->toHTML());
   $html->addBodyContent($priklad->getResultHTMLForm());
   $html->addBodyContent('<input type="submit" value="Hotovo">');
-  $html->addBodyContent('<input type="hidden" name="nofail" value="'. $nofail. '" />');
   $html->addBodyContent('</form>');
 }
 
-// $html->addBodyContent('<pre>'. print_r($level, TRUE). '</pre>');
-if ((time() - $starttime > 2) || ($level->solved > 0)) {
+if ((time() - $_SESSION['starttime'] > 2) || ($level->solved > 0)) {
+  # Progress message with results, time and level name
   $html->addBodyContent('<p>Spr&aacute;vn&ecaron; <span class="correct">'. $level->correct. '</span> z <span class="solved">'. $level->solved. '</span> p&rcaron;&iacute;klad&uring;');
-  if ($nofail == 'yes') {
+  switch ($_SESSION['difficulty']) {
+    case 3: $html->addBodyContent(' na&nbsp;t&ecaron;&zcaron;kou obt&iacute;&zcaron;nost '); break;
+    case 1: $html->addBodyContent(' na&nbsp;lehkou obt&iacute;&zcaron;nost '); break;
+  }
+  if ($_SESSION['nofail'] == 'yes') {
     $html->addBodyContent(' s&nbsp;opravami');
   }
   $html->addBodyContent(' ('. $level->name. ')');
-  $html->addBodyContent(' za <span class="time">'. sayTime($starttime). '</span>.</p>');
+  $html->addBodyContent(' za <span class="time">'. sayTime($_SESSION['starttime']). '</span>.</p>');
 }
 include 'include/footer.php';
 

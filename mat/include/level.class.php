@@ -153,4 +153,13 @@ class FormulaLevelAnglictina extends GenericLevel {
   }
 }
 
+class FormulaLevelAnglictinaNoSound extends GenericLevel {
+  function __construct() {
+    $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky (bez dikt&aacute;tu)';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array(100), 500);
+    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array(100));
+  }
+}
+
 ?>

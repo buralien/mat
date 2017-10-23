@@ -16,6 +16,7 @@ header("Pragma: no-cache"); // HTTP/1.0
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 require_once 'include/level.class.php';
+require_once 'include/stats.class.php';
 require_once 'HTML/Page2.php';
 
 define('MAT_DEBUG', 0); # Set to one to see debug output on the page
@@ -134,6 +135,12 @@ $result_msg = '';
 if ($check !== null) {
   # Get the correct solution
   $res = $check->getResult();
+
+  # Log the stats
+  $stats = new StatsManager();
+  $stats->addRecord(session_id(), $check, $results);
+  $stats->close();
+  
   if (!is_array($res)) {
     $res = array($res);
   }

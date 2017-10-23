@@ -1,7 +1,7 @@
 <?php
 session_start() or die("Failed to start sessions!");
 if (isset($_GET['startover'])) {
-  # Destroy saved session data nad start over
+  # Destroy saved session data and start over
   session_destroy();
   $_SESSION = array();
   header("HTTP/1.1 303 See Other");
@@ -140,7 +140,7 @@ if ($check !== null) {
   $stats = new StatsManager();
   $stats->addRecord(session_id(), $check, $results);
   $stats->close();
-  
+
   if (!is_array($res)) {
     $res = array($res);
   }

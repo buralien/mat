@@ -4,8 +4,8 @@ if (isset($_GET['startover'])) {
   # Destroy saved session data and start over
   session_destroy();
   $_SESSION = array();
-  header("HTTP/1.1 303 See Other");
-  header('Location: ?');
+  #header($_SERVER["SERVER_PROTOCOL"]." 303 See Other");
+  header('Location: ?', true, 303);
   die();
 }
 # Prevent caching of pages

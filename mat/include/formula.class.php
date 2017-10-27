@@ -738,10 +738,13 @@ class VyjmenovanaSlova extends Formula {
       while (strpos($form, '_') !== false) {
         $form = $this->blankReplace($form, array_shift($input));
       }
-      if ($handle = fopen($this->dict, 'r')) {
-        while($line = stream_get_line($handle, 256, "\n")) {
-          if ($line == $form) return true;
+      foreach ($dict in $this->dict_source) {
+        if ($handle = fopen($dict, 'r')) {
+          while($line = stream_get_line($handle, 256, "\n")) {
+            if ($line == $form) return true;
+          }
         }
+        fclose($handle);
       }
     }
     return false;

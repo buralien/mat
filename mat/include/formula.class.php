@@ -673,7 +673,7 @@ class PrevodJednotek extends Formula {
 class VyjmenovanaSlova extends Formula {
   public static $name = 'Vyjmenovan&aacute; slova';
   protected $element;
-  private $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
+  protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
   protected $dict;
 
   function __construct($letter = null) {
@@ -750,5 +750,37 @@ class VyjmenovanaSlova extends Formula {
     return false;
   }
 } // class VyjmenovanaSlova
+
+class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
+  public static $name = 'Vyjmenovan&aacute; slova (dikt&aacute;t)';
+
+  public function voiceEnabled() { return true; }
+
+  public function toHTML($result = FALSE) {
+    if ($result) {
+      return parent::toHTML(true);
+    } else {
+      $text = '<span class="formula">';
+      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\", \"Czech Female\", {rate: 0.7, volume: 1});document.forms[0].elements[1].focus();' type='button' value='Poslech' />";
+      $text .= '</span>';
+      return $text;
+    }
+  }
+
+  public function getResult() {
+    return $this->element->getValue();
+  }
+
+  public function getResultHTMLForm() {
+    return '<input type="text" class="result" name="result1" autocomplete="off" autofocus /> (napi&scaron; jak sly&scaron;&iacute;&scaron;)';
+  }
+
+  public function validateResult($input) {
+    if (is_array($input)) $input = implode(' ', $input);
+    $input = strtolower($input);
+    return ( $this->getResult() == $input );
+  }
+
+} // class VyjmenovanaSlovaDiktat
 
 ?>

@@ -162,4 +162,12 @@ class FormulaLevelAnglictinaNoSound extends GenericLevel {
   }
 }
 
+class FormulaLevelVyjmenovanaSlova extends GenericLevel {
+  function __construct() {
+    $this->name = 'Vyjmenovan&aacute; slova';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array(), 1000);
+  }
+}
+
 ?>

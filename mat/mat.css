@@ -62,3 +62,13 @@ p.footer {
   font-size: 8px;
   color: grey;
 }
+
+.select {
+  width: 1.3em;
+  height: 1.6em;
+  font-size: 36px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}

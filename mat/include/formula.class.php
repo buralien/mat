@@ -682,7 +682,6 @@ class VyjmenovanaSlova extends Formula {
       case 'y': $this->dict = 'include/slovnik-y.dict'; break;
       default: $this->dict = $this->dict_source[mt_rand(0, 1)];
     }
-    echo $this->dict;
     $this->element = new RandomWordElement($this->dict);
   }
   protected function getBlank() {
@@ -699,13 +698,14 @@ class VyjmenovanaSlova extends Formula {
     } else {
       $form = $this->getBlank();
       $rescount = 1;
+      $text .= '<label class="select">';
       while (strpos($form, '_') !== false) {
-        $input = '<select name="result'. $rescount. '"><option value="i">i</option><option value="y">y</option></select>';
+        $input = '<select name="result'. $rescount. '" class="select"><option value="*"> </option><option value="i">i</option><option value="y">y</option></select>';
         $form = $this->blankReplace($form, $input);
         $rescount++;
         if ($rescount > 256) break;
       }
-      $text .= $form. '</span>';
+      $text .= $form. '</label></span>';
     }
     return $text;
   }
@@ -738,7 +738,7 @@ class VyjmenovanaSlova extends Formula {
       while (strpos($form, '_') !== false) {
         $form = $this->blankReplace($form, array_shift($input));
       }
-      foreach ($dict in $this->dict_source) {
+      foreach ($this->dict_source as $dict) {
         if ($handle = fopen($dict, 'r')) {
           while($line = stream_get_line($handle, 256, "\n")) {
             if ($line == $form) return true;

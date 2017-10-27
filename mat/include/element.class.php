@@ -386,4 +386,31 @@ class RandomPhysicsElement extends PhysicsElement {
   }
 } // class RandomPhysicsElement
 
+class WordElement extends FormulaElement {
+  protected $word;
+  function __construct($word) {
+    $this->word = $word;
+  }
+  public function getValue() {
+    return $this->word;
+  }
+  public function toStr() {
+    return $this->word;
+  }
+  public function toHTML() {
+    return '<span class="primitive">'. $this->toStr($this->word). '</span>';
+  }
+
+
+} // class WordElement
+
+class RandomWordElement extends WordElement {
+  function __construct($dict) {
+    $words = file($dict, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
+    $index = mt_rand(0, count($words) - 1);
+    $this->word = $words[$index];
+    unset($words);
+  }
+} // class RandomWordElement
+
 ?>

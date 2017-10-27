@@ -670,4 +670,82 @@ class PrevodJednotek extends Formula {
   }
 }  // class PrevodJednotek
 
+class VyjmenovanaSlova extends Formula {
+  public static $name = 'Vyjmenovan&aacute; slova';
+  protected $element;
+  private $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
+  protected $dict;
+
+  function __construct($letter = null) {
+    switch ($letter) {
+      case 'i': $this->dict = 'include/slovnik-i.dict'; break;
+      case 'y': $this->dict = 'include/slovnik-y.dict'; break;
+      default: $this->dict = $this->dict_source[mt_rand(0, 1)];
+    }
+    echo $this->dict;
+    $this->element = new RandomWordElement($this->dict);
+  }
+  protected function getBlank() {
+    return strtr($this->element, 'iy', '__');
+  }
+  protected function blankReplace($haystack, $repl) {
+    return implode($repl, explode('_', $haystack, 2));
+  }
+
+  public function toHTML($result = FALSE) {
+    $text = '<span class="formula">';
+    if ($result) {
+      $text .= $this->element->toHTML();
+    } else {
+      $form = $this->getBlank();
+      $rescount = 1;
+      while (strpos($form, '_') !== false) {
+        $input = '<select name="result'. $rescount. '"><option value="i">i</option><option value="y">y</option></select>';
+        $form = $this->blankReplace($form, $input);
+        $rescount++;
+        if ($rescount > 256) break;
+      }
+      $text .= $form. '</span>';
+    }
+    return $text;
+  }
+  public function toStr($result = FALSE) {
+    if ($result) {
+      return $this->getBlank(). ' = '. $this->element->toStr();
+    } else {
+      return $this->getBlank();
+    }
+  }
+
+  public function getResult() {
+    $text = $this->getBlank();
+    $result = array();
+    while (($i = strpos($text, '_')) !== false) {
+      $result[] = $this->element->toStr()[$i];
+      $text = $this->blankReplace($text, '*');
+    }
+    return $result;
+  }
+
+  public function getResultHTMLForm() {
+    return '';
+  }
+
+  public function validateResult($input) {
+    if (is_array($input)) {
+      $form = $this->getBlank();
+      if (count($input) != substr_count($form, '_')) return false;
+      while (strpos($form, '_') !== false) {
+        $form = $this->blankReplace($form, array_shift($input));
+      }
+      if ($handle = fopen($this->dict, 'r')) {
+        while($line = stream_get_line($handle, 256, "\n")) {
+          if ($line == $form) return true;
+        }
+      }
+    }
+    return false;
+  }
+} // class VyjmenovanaSlova
+
 ?>

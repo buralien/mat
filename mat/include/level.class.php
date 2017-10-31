@@ -77,7 +77,7 @@ abstract class GenericLevel {
     foreach($this->formulas as $f) {
       $text[] = $f->getDescription();
     }
-    return implode(', ', $text);
+    return implode(', ', array_unique($text));
   }
 }
 
@@ -166,7 +166,17 @@ class FormulaLevelVyjmenovanaSlova extends GenericLevel {
   function __construct() {
     $this->name = 'Vyjmenovan&aacute; slova';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array(), 1000);
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('i'), 500);
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('y'), 5000);
+  }
+}
+
+class FormulaLevelVyjmenovanaSlovaDiktat extends GenericLevel {
+  function __construct() {
+    $this->name = 'Vyjmenovan&aacute; slova (dikt&aacute;t)';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlovaDiktat', array('i'), 500);
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlovaDiktat', array('y'), 5000);
   }
 }
 

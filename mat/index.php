@@ -32,7 +32,8 @@ $levels = array(
   'FormulaLevelNasobilka',
   'FormulaLevelAnglictina',
   'FormulaLevelAnglictinaNoSound',
-  'FormulaLevelVyjmenovanaSlova'
+  'FormulaLevelVyjmenovanaSlova',
+  'FormulaLevelVyjmenovanaSlovaDiktat'
   );
 
 function sayTime($timestamp) {
@@ -112,9 +113,11 @@ foreach ($_POST as $key => $val) {
   if (($key == 'init_level') && (is_numeric($val))) {
     $clsid = $levels[intval($val)];
     $level = new $clsid();
-    if (MAT_DEBUG) $html->addBodyContent('Level: <pre>'. print_r($level, true). '</pre>');
   }
 }
+if (MAT_DEBUG) $html->addBodyContent('Level: <pre>'. print_r($level, true). '</pre>');
+if (MAT_DEBUG) $html->addBodyContent('Level: <pre>'. print_r($check, true). '</pre>');
+
 
 if ( $_SESSION['countleft'] === null ) {
   # No setup was done yet, reset SESSION and display the initial page
@@ -175,9 +178,9 @@ if ($check !== null) {
 if ($priklad === null) {
   # Need to generate a new formula
   $priklad = $level->getFormula();
-  if ($priklad->voiceEnabled()) {
-    $html->addScript('https://code.responsivevoice.org/responsivevoice.js');
-  }
+}
+if ($priklad->voiceEnabled()) {
+  $html->addScript('https://code.responsivevoice.org/responsivevoice.js');
 }
 $_SESSION['level'] = encryptObject($level);
 $_SESSION['priklad'] = encryptObject($priklad);

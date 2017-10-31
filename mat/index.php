@@ -75,6 +75,22 @@ data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAA
 FAVICON;
 $html->addHeadLink($favicon, 'icon');
 
+$js = <<<JS
+function fade(element) {
+var op = 2;
+var timer = setInterval(function () {
+    if (op <= 0.2){
+        clearInterval(timer);
+        op = 0
+    }
+    element.style.opacity = op;
+    element.style.filter = 'alpha(opacity=' + op * 50 + ")";
+    op -= op * 0.05;
+}, 100);
+}
+JS;
+$html->addScriptDeclaration($js);
+
 if (MAT_DEBUG) $html->addBodyContent('Session: <pre>'. print_r($_SESSION, true). '</pre>');
 if (MAT_DEBUG) $html->addBodyContent('POST: <pre>'. print_r($_POST, true). '</pre>');
 
@@ -158,13 +174,15 @@ if ($check !== null) {
     $_SESSION['countleft']--;
     $level->correct += 1;
     $level->addWeight(get_class($check), -100);
-    $result_msg = '<h2 class="success">Spr&aacute;vn&ecaron;!</h2>';
+    $result_msg = '<h2 class="success" id="temporary">Spr&aacute;vn&ecaron;!</h2>';
+    $html->setBodyAttributes(array('onload' => 'fade(document.getElementById("temporary"));'));
   } else {
     # Incorrect input
     if ($_SESSION['countleft'] < $level->max_formulas) { $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft'])); }
     $spatne=TRUE;
     $level->addWeight(get_class($check), 100);
-    $result_msg = '<h2 class="fail">&Scaron;patn&ecaron;!</h2>';
+    $result_msg = '<h2 class="fail" id="temporary">&Scaron;patn&ecaron;!</h2>';
+    $html->setBodyAttributes(array('onload' => 'fade(document.getElementById("temporary"));'));
     if ($_SESSION['nofail'] == "yes") {
       # Repeat the same formula, no solution is shown
       $priklad = $check;

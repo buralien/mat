@@ -20,7 +20,7 @@ require_once 'include/stats.class.php';
 require_once 'HTML/Page2.php';
 
 define('MAT_DEBUG', 0); # Set to one to see debug output on the page
-define('POCATECNI_POCET', 10); # Default number of formulas to generate
+define('POCATECNI_POCET', 10); # Default number of formulas to solve
 
 # List of allowed formula levels (see level.class.php)
 $levels = array(
@@ -30,10 +30,11 @@ $levels = array(
   'FormulaLevel3b',
   'FormulaLevel4a',
   'FormulaLevelNasobilka',
-  'FormulaLevelAnglictina',
   'FormulaLevelAnglictinaNoSound',
+  'FormulaLevelAnglictina',
   'FormulaLevelVyjmenovanaSlova',
-  'FormulaLevelVyjmenovanaSlovaDiktat'
+  'FormulaLevelVyjmenovanaSlovaDiktat',
+  'FormulaLevelRomanNumerals'
   );
 
 function sayTime($timestamp) {
@@ -67,6 +68,7 @@ function decryptObject($text) {
 }
 
 $html = new HTML_Page2();
+$html->setTitle('MAT');
 $html->addStyleSheet('mat.css');
 
 # Inline favicon.ico
@@ -132,7 +134,7 @@ foreach ($_POST as $key => $val) {
   }
 }
 if (MAT_DEBUG) $html->addBodyContent('Level: <pre>'. print_r($level, true). '</pre>');
-if (MAT_DEBUG) $html->addBodyContent('Level: <pre>'. print_r($check, true). '</pre>');
+if (MAT_DEBUG) $html->addBodyContent('Check: <pre>'. print_r($check, true). '</pre>');
 
 
 if ( $_SESSION['countleft'] === null ) {
@@ -204,7 +206,6 @@ $_SESSION['level'] = encryptObject($level);
 $_SESSION['priklad'] = encryptObject($priklad);
 session_write_close();
 
-$html->setTitle('MAT');
 if (MAT_DEBUG) $html->addBodyContent('<pre>'. print_r($priklad, TRUE). '</pre>');
 
 if ($_SESSION['countleft'] == 0) {

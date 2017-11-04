@@ -3,6 +3,7 @@ require_once 'element.class.php';
 
 abstract class Formula {
   public static $name;
+  public static $subject;
   abstract public function toHTML($result = FALSE);
   abstract public function toStr($result = FALSE);
   abstract public function getResult();
@@ -27,6 +28,7 @@ abstract class Formula {
 
 class SimpleFormula extends Formula {
   public static $name = 'Aritmetika';
+  public static $subject = 'Matematika';
   protected $element1;
   protected $operator;
   protected $element2;
@@ -101,6 +103,7 @@ class SimpleFormula extends Formula {
 
 class RandomSimpleFormula extends SimpleFormula {
   public static $name = 'Aritmetika';
+  public static $subject = 'Matematika';
   function __construct ($max = null, $opmask = 0) {
     if ($max === null) {
       $max = mt_getrandmax();
@@ -118,6 +121,7 @@ class RandomSimpleFormula extends SimpleFormula {
 
 class TripleFormula extends Formula {
   public static $name = "Aritmetika (3 &ccaron;&iacute;sla)";
+  public static $subject = 'Matematika';
   protected $element1;
   protected $operator1;
   protected $element2;
@@ -271,6 +275,7 @@ class DeleniSeZbytkem extends SimpleFormula {
 
 class VelkeScitani extends SimpleFormula {
   public static $name = 'S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute;';
+  public static $subject = 'Matematika';
   function __construct($max = 1000) {
     self::$name .= ' do '. $max;
     do {
@@ -284,6 +289,7 @@ class VelkeScitani extends SimpleFormula {
 
 class DvaSoucty extends TripleFormula {
   public static $name = "S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute; (3 &ccaron;&iacute;sla)";
+  public static $subject = 'Matematika';
   function __construct ($max = 1000) {
     self::$name .= ' do '. $max;
     do {
@@ -305,6 +311,7 @@ class DvaSoucty extends TripleFormula {
 
 class RomanNumerals extends Formula {
   public static $name = '&Rcaron;&iacute;msk&eacute; &ccaron;&iacute;slice';
+  public static $subject = 'Matematika';
   private $element;
   private $lookup = array(
     'M' => 1000,
@@ -373,14 +380,11 @@ class RomanNumerals extends Formula {
     $html .= '</span>';
     return $html;
   }
-  function getResultHTMLForm() {
-    return '<input type="text" class="result" name="result1" autofocus />';
-  }
-
 }
 
 class MultiFormula extends Formula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
+  public static $subject = 'Matematika';
   protected $elements;
   protected $operators;
 
@@ -445,6 +449,8 @@ class MultiFormula extends Formula {
 }
 
 class RandomSimpleMultiFormula extends MultiFormula {
+  public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
+  public static $subject = 'Matematika';
   function __construct($max = 0, $min = 2, $max_num = 4, $min_num = 0 ) {
     if ($max == 0) $max = mt_getrandmax();
     if ($min < 2) $min = 2;
@@ -472,6 +478,7 @@ class RandomSimpleMultiFormula extends MultiFormula {
 
 class SimpleBracketFormula extends SimpleFormula {
   public static $name = 'Aritmetika se z&aacute;vorkou';
+  public static $subject = 'Matematika';
   function __construct($max = 0) {
     if ($max == 0) {
       $max = mt_getrandmax();
@@ -495,6 +502,7 @@ class SimpleBracketFormula extends SimpleFormula {
 
 class EnglishTextFormula extends Formula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky';
+  public static $subject = 'Angli&ccaron;tina';
   protected $element;
 
   function __construct($max = 100, $min = 0) {
@@ -531,6 +539,7 @@ class EnglishTextFormula extends Formula {
 
 class ReverseEnglishTextFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (z &ccaron;&iacute;sel)';
+  public static $subject = 'Angli&ccaron;tina';
 
   public function getResult() {
     return $this->element->toStr();
@@ -567,6 +576,7 @@ class ReverseEnglishTextFormula extends EnglishTextFormula {
 
 class EnglishSpeechFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - &ccaron;&iacute;sla)';
+  public static $subject = 'Angli&ccaron;tina';
 
   public function voiceEnabled() { return true; }
 
@@ -584,6 +594,7 @@ class EnglishSpeechFormula extends EnglishTextFormula {
 
 class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - slova)';
+  public static $subject = 'Angli&ccaron;tina';
 
   public function voiceEnabled() { return true; }
 
@@ -601,6 +612,7 @@ class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
 
 class PrevodJednotek extends Formula {
   public static $name = 'P&rcaron;evod jednotek';
+  public static $subject = 'Matematika';
   private $element;
   private $sourceprefix;
   private $targetprefix;
@@ -672,6 +684,7 @@ class PrevodJednotek extends Formula {
 
 class VyjmenovanaSlova extends Formula {
   public static $name = 'Vyjmenovan&aacute; slova';
+  public static $subject = '&Ccaron;e&scaron;tina';
   protected $element;
   protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
   protected $dict;
@@ -753,6 +766,7 @@ class VyjmenovanaSlova extends Formula {
 
 class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
   public static $name = 'Vyjmenovan&aacute; slova (dikt&aacute;t)';
+  public static $subject = '&Ccaron;e&scaron;tina';
 
   public function voiceEnabled() { return true; }
 
@@ -780,7 +794,6 @@ class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
     $input = strtolower($input);
     return ( $this->getResult() == $input );
   }
-
 } // class VyjmenovanaSlovaDiktat
 
 ?>

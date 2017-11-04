@@ -39,6 +39,10 @@ input[type=number] {
   width: 4em;
 }
 
+input[type=text].result {
+  width: 14em;
+}
+
 .speech {
   border: none;
   color: white;
@@ -71,4 +75,19 @@ h2.fail {
   margin: 0;
   padding: 0;
   cursor: pointer;
+}
+
+.label {
+  padding: 16px;
+  margin: 16px;
+  text-align: center;
+  border: 1px solid black;
+  cursor: pointer;
+  border-collapse: collapse;
+  border-radius: 16px;
+}
+.elements {
+  margin: 0 16px;
+  padding: 16px;
+  display: block;
 }

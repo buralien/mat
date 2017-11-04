@@ -6,6 +6,7 @@ class FormulaWeight {
   private $formula;
   private $args;
   private $weight;
+
   function __construct($formula, $args, $weight = 1000) {
     $this->formula = $formula;
     $this->args = $args;
@@ -29,6 +30,10 @@ class FormulaWeight {
     $f = $this->formula;
     return $f::$name;
   }
+  public function getSubject() {
+    $f = $this->formula;
+    return $f::$subject;
+  }
 }
 
 abstract class GenericLevel {
@@ -38,6 +43,7 @@ abstract class GenericLevel {
   public $solved = 0;
   public $correct = 0;
   protected $solved_hash;
+  public $subjects;
 
   public function getFormula() {
     $totalweight = 0;
@@ -79,6 +85,14 @@ abstract class GenericLevel {
     }
     return implode(', ', array_unique($text));
   }
+
+  protected function setSubjects() {
+    $subj = array();
+    foreach ($this->formulas as $formula) {
+      $subj[$formula->getSubject()] = 1;
+    }
+    $this->subjects = array_keys($subj);
+  }
 }
 
 class FormulaLevel1 extends GenericLevel {
@@ -86,6 +100,7 @@ class FormulaLevel1 extends GenericLevel {
     $this->name = '1. t&rcaron;&iacute;da';
     $this->formulas = array();
     $this->formulas[] = new FormulaWeight('RandomSimpleFormula', array(10, OP_MINUS + OP_KRAT + OP_DELENO));
+    $this->setSubjects();
   }
 }
 
@@ -95,6 +110,7 @@ class FormulaLevel2 extends GenericLevel {
     $this->formulas = array();
     $this->formulas[] = new FormulaWeight('RandomSimpleFormula', array(100, OP_KRAT + OP_DELENO));
     $this->formulas[] = new FormulaWeight('MalaNasobilka', array(5));
+    $this->setSubjects();
   }
 }
 
@@ -105,6 +121,7 @@ class FormulaLevel3a extends GenericLevel {
     $this->formulas[] = new FormulaWeight('RandomSimpleFormula', array(100, OP_KRAT + OP_DELENO));
     $this->formulas[] = new FormulaWeight('MalaNasobilka', array());
     $this->formulas[] = new FormulaWeight('SimpleBracketFormula', array(100));
+    $this->setSubjects();
   }
 }
 
@@ -116,6 +133,7 @@ class FormulaLevel3b extends GenericLevel {
     $this->formulas[] = new FormulaWeight('DvaSoucty', array(100));
     $this->formulas[] = new FormulaWeight('MalaNasobilka', array(10, 2));
     $this->formulas[] = new FormulaWeight('DeleniSeZbytkem', array(99));
+    $this->setSubjects();
   }
 }
 
@@ -129,6 +147,7 @@ class FormulaLevel4a extends GenericLevel {
     $this->formulas[] = new FormulaWeight('DeleniSeZbytkem', array(99));
     $this->formulas[] = new FormulaWeight('SimpleBracketFormula', array(100));
     $this->formulas[] = new FormulaWeight('PrevodJednotek', array('k', 'm', 1000, array('m', 'l')));
+    $this->setSubjects();
   }
 }
 
@@ -139,26 +158,29 @@ class FormulaLevelNasobilka extends GenericLevel {
     $this->formulas[] = new FormulaWeight('MalaNasobilka', array(10, 3));
     $this->formulas[] = new FormulaWeight('StredniNasobilka', array(50), 500);
     $this->formulas[] = new FormulaWeight('DeleniSeZbytkem', array(99), 500);
+    $this->setSubjects();
   }
 }
 
 class FormulaLevelAnglictina extends GenericLevel {
-  function __construct() {
-    $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky';
+  function __construct($max = 199) {
+    $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t)';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array(100), 500);
-    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array(100));
-    $this->formulas[] = new FormulaWeight('EnglishSpeechFormula', array(100));
-    $this->formulas[] = new FormulaWeight('ReverseEnglishSpeechFormula', array(100));
+    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array($max), 500);
+    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array($max));
+    $this->formulas[] = new FormulaWeight('EnglishSpeechFormula', array($max));
+    $this->formulas[] = new FormulaWeight('ReverseEnglishSpeechFormula', array($max));
+    $this->setSubjects();
   }
 }
 
 class FormulaLevelAnglictinaNoSound extends GenericLevel {
-  function __construct() {
-    $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky (bez dikt&aacute;tu)';
+  function __construct($max = 199) {
+    $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array(100), 500);
-    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array(100));
+    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array($max), 500);
+    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array($max));
+    $this->setSubjects();
   }
 }
 
@@ -166,8 +188,9 @@ class FormulaLevelVyjmenovanaSlova extends GenericLevel {
   function __construct() {
     $this->name = 'Vyjmenovan&aacute; slova';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('i'), 500);
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('i'));
     $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('y'), 5000);
+    $this->setSubjects();
   }
 }
 
@@ -175,8 +198,20 @@ class FormulaLevelVyjmenovanaSlovaDiktat extends GenericLevel {
   function __construct() {
     $this->name = 'Vyjmenovan&aacute; slova (dikt&aacute;t)';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('VyjmenovanaSlovaDiktat', array('i'), 500);
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('i'));
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('y'), 5000);
+    $this->formulas[] = new FormulaWeight('VyjmenovanaSlovaDiktat', array('i'));
     $this->formulas[] = new FormulaWeight('VyjmenovanaSlovaDiktat', array('y'), 5000);
+    $this->setSubjects();
+  }
+}
+
+class FormulaLevelRomanNumerals extends GenericLevel {
+  function __construct() {
+    $this->name = '&Rcaron;&iacute;msk&eacute; &ccaron;&iacute;slice';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('RomanNumerals', array());
+    $this->setSubjects();
   }
 }
 

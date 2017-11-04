@@ -8,7 +8,7 @@ $html->addBodyContent('<form method="post">');
 
 foreach ($levels as $id => $clsid) {
   $l = new $clsid();
-  $html->addBodyContent('<label><input type="radio" name="init_level" value="'. $id. '" />');
+  $html->addBodyContent('<label class="lvl_label"><input type="radio" name="init_level" value="'. $id. '" />');
   $html->addBodyContent('<span class="lvl_name">'. $l->name. '</span><br />');
   $html->addBodyContent('<span class="lvl_desc">'. $l->getDescription(). '</span></label><br />');
 }

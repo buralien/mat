@@ -6,20 +6,23 @@ $js = <<<JS
 function start() {
   var elems = document.getElementsByClassName('elements');
   var labels = document.getElementsByClassName('label');
-  for (var i = 0; i < elems.length; i++) {
-    elems[i].style.display = 'none';
-  }
+  hideAll();
   for (var i = 0; i < labels.length; i++) {
     labels[i].onclick = toggleBlock;
+  }
+}
+function hideAll() {
+  var elems = document.getElementsByClassName('elements');
+  for (var i = 0; i < elems.length; i++) {
+    elems[i].style.display = 'none';
   }
 }
 function toggleBlock(evnt) {
   itemid = "elements" + evnt.target.id.substr(5, 1);
   item = document.getElementById(itemid);
   if (item.style.display=='none') {
+    hideAll();
     item.style.display = 'block';
-  } else {
-    item.style.display = 'none';
   }
 }
 //]]>

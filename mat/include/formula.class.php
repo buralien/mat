@@ -691,8 +691,8 @@ class VyjmenovanaSlova extends Formula {
 
   function __construct($letter = null) {
     switch ($letter) {
-      case 'i': $this->dict = 'include/slovnik-i.dict'; break;
-      case 'y': $this->dict = 'include/slovnik-y.dict'; break;
+      case 'i': case 'í': $this->dict = 'include/slovnik-i.dict'; break;
+      case 'y': case 'ý': $this->dict = 'include/slovnik-y.dict'; break;
       default: $this->dict = $this->dict_source[mt_rand(0, 1)];
     }
     $this->element = new RandomWordElement($this->dict);
@@ -795,5 +795,153 @@ class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
     return ( $this->getResult() == $input );
   }
 } // class VyjmenovanaSlovaDiktat
+
+class SouhlaskyUprostredSlov extends Formula {
+  public static $name = 'Souhl&aacute;sky uprost&rcaron;ed slova';
+  public static $subject = '&Ccaron;e&scaron;tina';
+  protected $element;
+  protected $dict_source = array('include/slovnik-bp.dict', 'include/slovnik-dt.dict', 'include/slovnik-sz.dict', 'include/slovnik-vf.dict');
+  protected $dict;
+  protected $toreplace;
+
+  function __construct($letter = null) {
+    switch ($letter) {
+      case 'b':
+        $this->dict = 'include/slovnik-bp.dict';
+        $this->toreplace = array('b', 'p');
+        break;
+      case 'd':
+        $this->dict = 'include/slovnik-dt.dict';
+        $this->toreplace = array('d', 't');
+        break;
+      case 's':
+        $this->dict = 'include/slovnik-sz.dict';
+        $this->toreplace = array('s', 'z');
+        break;
+      case 'v':
+        $this->dict = 'include/slovnik-vf.dict';
+        $this->toreplace = array('v', 'f');
+        break;
+      default:
+        $this->dict = $this->dict_source[mt_rand(0, count($this->dict_source) - 1)];
+        $this->toreplace = str_split(substr($this->dict, 16, 2));
+    }
+    if (in_array('d', $this->toreplace)) {
+      $this->toreplace[] = 'ď';
+    }
+    if (in_array('t', $this->toreplace)) {
+      $this->toreplace[] = 'ť';
+    }
+    if (in_array('s', $this->toreplace)) {
+      $this->toreplace[] = 'š';
+    }
+    if (in_array('z', $this->toreplace)) {
+      $this->toreplace[] = 'ž';
+    }
+    $this->element = new RandomWordElement($this->dict);
+  }
+  protected function getBlank() {
+    return str_replace($this->toreplace, '_', $this->element);
+  }
+  protected function blankReplace($haystack, $repl) {
+    return implode($repl, explode('_', $haystack, 2));
+  }
+
+  public function toHTML($result = FALSE) {
+    $text = '<span class="formula">';
+    if ($result) {
+      $text .= $this->element->toHTML();
+    } else {
+      $form = $this->getBlank();
+      $rescount = 1;
+      $text .= '<label class="select">';
+      while (strpos($form, '_') !== false) {
+        $input = '<select name="result'. $rescount. '" class="select"><option value="*"> </option>';
+        foreach($this->toreplace as $char) {
+          $input .= '<option value="'. $char. '">'. htmlentities($char, ENT_HTML5, "UTF-8"). '</option>';
+        }
+        $input .= '</select>';
+        $form = $this->blankReplace($form, $input);
+        $rescount++;
+        if ($rescount > 256) break;
+      }
+      $text .= $form. '</label></span>';
+    }
+    return $text;
+  }
+  public function toStr($result = FALSE) {
+    if ($result) {
+      return $this->getBlank(). ' = '. $this->element->toStr();
+    } else {
+      return $this->getBlank();
+    }
+  }
+
+  public function getResult() {
+    $text = $this->getBlank();
+    $result = array();
+    while (($i = strpos($text, '_')) !== false) {
+      $result[] = $this->element->toStr()[$i];
+      $text = $this->blankReplace($text, '*');
+    }
+    return $result;
+  }
+
+  public function getResultHTMLForm() {
+    return '';
+  }
+
+  public function validateResult($input) {
+    if (is_array($input)) {
+      $form = $this->getBlank();
+      if (count($input) != substr_count($form, '_')) return false;
+      while (strpos($form, '_') !== false) {
+        $form = $this->blankReplace($form, array_shift($input));
+      }
+      foreach ($this->dict_source as $dict) {
+        if ($handle = fopen($dict, 'r')) {
+          while($line = stream_get_line($handle, 256, "\n")) {
+            if ($line == $form) return true;
+          }
+        }
+        fclose($handle);
+      }
+    }
+    return false;
+  }
+} // class SouhlaskyUprostredSlov
+
+class VyjmenovanaSlova2 extends SouhlaskyUprostredSlov {
+  public static $name = 'Vyjmenovan&aacute; slova';
+  public static $subject = '&Ccaron;e&scaron;tina';
+  protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
+
+  function __construct($letter = null) {
+    switch ($letter) {
+      case 'i':
+        $this->dict = 'include/slovnik-i.dict';
+        break;
+      case 'y':
+        $this->dict = 'include/slovnik-y.dict';
+        break;
+      default:
+        $this->dict = $this->dict_source[mt_rand(0, count($this->dict_source) - 1)];
+    }
+    $this->toreplace = array('i', 'y', 'í', 'ý');
+    $this->element = new RandomWordElement($this->dict);
+  }
+}
+
+class DlouheUFormula extends SouhlaskyUprostredSlov {
+  public static $name = 'Dlouh&eacute; u';
+  public static $subject = '&Ccaron;e&scaron;tina';
+  protected $dict_source = array('include/slovnik-u.dict');
+
+  function __construct($letter = null) {
+    $this->dict = 'include/slovnik-u.dict';
+    $this->toreplace = array('ú', 'ů');
+    $this->element = new RandomWordElement($this->dict);
+  }
+}
 
 ?>

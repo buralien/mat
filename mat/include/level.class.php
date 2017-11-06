@@ -54,7 +54,7 @@ abstract class GenericLevel {
     $pick = mt_rand(0, $totalweight);
     foreach ($this->formulas as $frml) {
       $pick -= $frml->getWeight();
-      if ($pick < 0) {
+      if ($pick <= 0) {
         do {
           $ret = $frml->getFormula();
           $h = hash('md5', $ret);
@@ -211,6 +211,16 @@ class FormulaLevelRomanNumerals extends GenericLevel {
     $this->name = '&Rcaron;&iacute;msk&eacute; &ccaron;&iacute;slice';
     $this->formulas = array();
     $this->formulas[] = new FormulaWeight('RomanNumerals', array());
+    $this->setSubjects();
+  }
+}
+
+class FormulaLevelCestina3 extends GenericLevel {
+  function __construct() {
+    $this->name = 'Souhl&aacute;sky uprost&rcaron;ed slova';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('SouhlaskyUprostredSlov', array());
+    $this->formulas[] = new FormulaWeight('DlouheUFormula', array());
     $this->setSubjects();
   }
 }

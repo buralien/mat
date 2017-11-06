@@ -34,7 +34,8 @@ $levels = array(
   'FormulaLevelAnglictina',
   'FormulaLevelVyjmenovanaSlova',
   'FormulaLevelVyjmenovanaSlovaDiktat',
-  'FormulaLevelRomanNumerals'
+  'FormulaLevelRomanNumerals',
+  'FormulaLevelCestina3'
   );
 
 function sayTime($timestamp) {

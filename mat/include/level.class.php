@@ -198,8 +198,6 @@ class FormulaLevelVyjmenovanaSlovaDiktat extends GenericLevel {
   function __construct() {
     $this->name = 'Vyjmenovan&aacute; slova (dikt&aacute;t)';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('i'));
-    $this->formulas[] = new FormulaWeight('VyjmenovanaSlova', array('y'), 5000);
     $this->formulas[] = new FormulaWeight('VyjmenovanaSlovaDiktat', array('i'));
     $this->formulas[] = new FormulaWeight('VyjmenovanaSlovaDiktat', array('y'), 5000);
     $this->setSubjects();
@@ -217,9 +215,9 @@ class FormulaLevelRomanNumerals extends GenericLevel {
 
 class FormulaLevelCestina3 extends GenericLevel {
   function __construct() {
-    $this->name = 'Souhl&aacute;sky uprost&rcaron;ed slova';
+    $this->name = '&Ccaron;e&scaron;tina pro 3. t&rcaron;&iacute;du';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('SouhlaskyUprostredSlov', array());
+    $this->formulas[] = new FormulaWeight('SouhlaskyUprostredSlov', array(), 2000);
     $this->formulas[] = new FormulaWeight('DlouheUFormula', array());
     $this->setSubjects();
   }

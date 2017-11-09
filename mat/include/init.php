@@ -37,7 +37,13 @@ $subj_form = array();
 foreach ($levels as $id => $clsid) {
   $l = new $clsid();
   $subj = implode(' ', $l->subjects);
-  $subj_form[$subj][] = '<label class="lvl_label"><input type="radio" name="init_level" value="'. $id. '" />';
+  $onclick = " onclick=\"document.getElementById('nofail').checked=";
+  if ($subj != 'Matematika') {
+    $onclick .= "false;\"";
+  } else {
+    $onclick .= "true;\"";
+  }
+  $subj_form[$subj][] = '<label class="lvl_label"'. $onclick. '><input type="radio" name="init_level" value="'. $id. '" />';
   $subj_form[$subj][] = '<span class="lvl_name">'. $l->name. '</span><br />';
   $subj_form[$subj][] = '<span class="lvl_desc">'. $l->getDescription(). '</span></label><br />';
   unset($l);
@@ -66,7 +72,7 @@ $html->addBodyContent('<label><input type="radio" name="difficulty" value="2" ch
 $html->addBodyContent('<label><input type="radio" name="difficulty" value="3" />&nbsp;T&ecaron;&zcaron;k&aacute;</label>');
 
 $html->addBodyContent('<br /><label><input type="number" name="countleft" value="'. POCATECNI_POCET. '" />&nbsp;p&rcaron;&iacute;klad&uring;</label>');
-$html->addBodyContent('<br /><label><input type="checkbox" name="nofail" value="yes" checked="checked" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');
+$html->addBodyContent('<br /><label><input type="checkbox" name="nofail" id="nofail" value="yes" checked="checked" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');
 
 $html->addBodyContent('<br /><input type="submit" class="init" name="init" value="Za&ccaron;&iacute;t" />');
 $html->addBodyContent('</form>');

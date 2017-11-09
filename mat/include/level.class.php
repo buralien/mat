@@ -155,9 +155,9 @@ class FormulaLevelNasobilka extends GenericLevel {
   function __construct() {
     $this->name = 'Procvi&ccaron;ov&aacute;n&iacute; n&aacute;sobilky';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('MalaNasobilka', array(10, 3));
-    $this->formulas[] = new FormulaWeight('StredniNasobilka', array(50), 500);
-    $this->formulas[] = new FormulaWeight('DeleniSeZbytkem', array(99), 500);
+    $this->formulas[] = new FormulaWeight('MalaNasobilka', array(10, 3), 2000);
+    $this->formulas[] = new FormulaWeight('StredniNasobilka', array(50));
+    $this->formulas[] = new FormulaWeight('DeleniSeZbytkem', array(99));
     $this->setSubjects();
   }
 }
@@ -176,8 +176,8 @@ class FormulaLevelAnglictinaNoSound extends GenericLevel {
   function __construct($max = 199) {
     $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array($max), 500);
-    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array($max));
+    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array($max));
+    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array($max), 2000);
     $this->setSubjects();
   }
 }
@@ -218,6 +218,7 @@ class FormulaLevelCestina3 extends GenericLevel {
     $this->formulas[] = new FormulaWeight('SouhlaskyUprostredSlov', array(), 2000);
     $this->formulas[] = new FormulaWeight('DlouheUFormula', array());
     $this->formulas[] = new FormulaWeight('SlovniDruhy', array(), 2000);
+    $this->formulas[] = new FormulaWeight('SkladbaSlova', array(), 2000);
     $this->setSubjects();
   }
 }

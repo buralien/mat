@@ -847,16 +847,16 @@ class SouhlaskyUprostredSlov extends Formula {
     return implode($repl, explode('_', $haystack, 2));
   }
 
-  public function toHTML($result = FALSE) {
+  public function toHTML($result = FALSE, $cls = 'select') {
     $text = '<span class="formula">';
     if ($result) {
       $text .= $this->element->toHTML();
     } else {
       $form = $this->getBlank();
       $rescount = 1;
-      $text .= '<label class="select">';
+      $text .= '<label class="'. $cls. '">';
       while (strpos($form, '_') !== false) {
-        $input = '<select name="result'. $rescount. '" class="select"><option value="*"> </option>';
+        $input = '<select name="result'. $rescount. '" class="'. $cls. '"><option value="*"> </option>';
         foreach($this->toreplace as $char) {
           $input .= '<option value="'. $char. '">'. htmlentities($char, ENT_HTML5, "UTF-8"). '</option>';
         }
@@ -944,6 +944,54 @@ class DlouheUFormula extends SouhlaskyUprostredSlov {
     $this->element = new RandomWordElement($this->dict);
   }
 }
+
+class SkladbaSlova extends SouhlaskyUprostredSlov {
+  public static $name = 'Skladba slova';
+  public static $subject = '&Ccaron;e&scaron;tina';
+  protected $dict_source = array('include/slovnik-bevepe.dict', 'include/slovnik-me.dict');
+
+  function __construct($letter = null) {
+    $this->dict = $this->dict_source[mt_rand(0, count($this->dict_source) - 1)];
+    $this->element = new RandomWordElement($this->dict);
+    $repl = array();
+    if ((strpos($this->element, 'bě') !== false) || (strpos($this->element, 'bje') !== false)) {
+      $repl['bě'] = 1;
+      $repl['bje'] = 1;
+    }
+    if ((strpos($this->element, 'pě') !== false) || (strpos($this->element, 'pje') !== false)) {
+      $repl['pě'] = 1;
+      $repl['pje'] = 1;
+    }
+    if ((strpos($this->element, 'vě') !== false) || (strpos($this->element, 'vje') !== false)) {
+      $repl['vě'] = 1;
+      $repl['vje'] = 1;
+    }
+    if ((strpos($this->element, 'mě') !== false) || (strpos($this->element, 'mně') !== false)) {
+      $repl['mě'] = 1;
+      $repl['mně'] = 1;
+    }
+    $this->toreplace = array_keys($repl);
+  }
+
+  public function getResult() {
+    $text = $this->getBlank();
+    $result = array();
+    while (($i = strpos($text, '_')) !== false) {
+      foreach ($this->toreplace as $option) {
+        $substr = substr($this->element->toStr(), $i, strlen($option));
+        if($substr == $option) {
+          $result[] = $substr;
+        }
+      }
+      $text = $this->blankReplace($text, '*');
+    }
+    return $result;
+  }
+
+  public function toHTML($result = FALSE, $cls = 'select3') {
+    return parent::toHTML($result, $cls);
+  }
+} // class SkladbaSlova
 
 class SlovniDruhy extends Formula {
   protected $element;

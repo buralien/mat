@@ -166,8 +166,6 @@ class FormulaLevelAnglictina extends GenericLevel {
   function __construct($max = 199) {
     $this->name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t)';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('EnglishTextFormula', array($max), 500);
-    $this->formulas[] = new FormulaWeight('ReverseEnglishTextFormula', array($max));
     $this->formulas[] = new FormulaWeight('EnglishSpeechFormula', array($max));
     $this->formulas[] = new FormulaWeight('ReverseEnglishSpeechFormula', array($max));
     $this->setSubjects();

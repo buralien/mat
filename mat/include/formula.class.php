@@ -682,7 +682,7 @@ class PrevodJednotek extends Formula {
   }
 }  // class PrevodJednotek
 
-class VyjmenovanaSlova extends Formula {
+class VyjmenovanaSlovaOld extends Formula {
   public static $name = 'Vyjmenovan&aacute; slova';
   public static $subject = '&Ccaron;e&scaron;tina';
   protected $element;
@@ -911,7 +911,7 @@ class SouhlaskyUprostredSlov extends Formula {
   }
 } // class SouhlaskyUprostredSlov
 
-class VyjmenovanaSlova2 extends SouhlaskyUprostredSlov {
+class VyjmenovanaSlova extends SouhlaskyUprostredSlov {
   public static $name = 'Vyjmenovan&aacute; slova';
   public static $subject = '&Ccaron;e&scaron;tina';
   protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');

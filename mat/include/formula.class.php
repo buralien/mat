@@ -865,8 +865,9 @@ class SouhlaskyUprostredSlov extends Formula {
         $rescount++;
         if ($rescount > 256) break;
       }
-      $text .= $form. '</label></span>';
+      $text .= $form. '</label>';
     }
+    $text .= '</span>';
     return $text;
   }
   public function toStr($result = FALSE) {
@@ -943,5 +944,67 @@ class DlouheUFormula extends SouhlaskyUprostredSlov {
     $this->element = new RandomWordElement($this->dict);
   }
 }
+
+class SlovniDruhy extends Formula {
+  protected $element;
+  protected $druh;
+  public static $name = 'Slovn&iacute; druhy';
+  public static $subject = '&Ccaron;e&scaron;tina';
+  protected $dict_source = array(
+    1 => 'include/druh-podstatne.dict',
+    2 => 'include/druh-pridavne.dict',
+    3 => 'include/druh-zajmeno.dict',
+    4 => 'include/druh-cislovka.dict',
+    5 => 'include/druh-sloveso.dict',
+    6 => 'include/druh-prislovce.dict',
+    7 => 'include/druh-predlozka.dict',
+    8 => 'include/druh-spojka.dict'
+  );
+  protected $sl_druhy = array(
+    1 => 'Podstatn&eacute; jm&eacute;no',
+    2 => 'P&rcaron;&iacute;davn&eacute; jm&eacute;no',
+    3 => 'Z&aacute;jmeno',
+    4 => '&Ccaron;&iacute;slovka',
+    5 => 'Sloveso',
+    6 => 'P&rcaron;&iacute;slovce',
+    7 => 'P&rcaron;edlo&zcaron;ka',
+    8 => 'Spojka'
+  );
+
+  function __construct() {
+    $this->druh = mt_rand(1, 8);
+    $this->element = new RandomWordElement($this->dict_source[$this->druh]);
+  }
+
+  public function getResult() {
+    return $this->druh;
+  }
+
+  public function toStr($result = false) {
+    $text = $this->element->toStr();
+    if ($result) {
+      $text .= ' je '. $this->druh;
+    }
+    return $text;
+  }
+
+  public function toHTML($result = false) {
+    $text = '<span class="formula">'. $this->element->toHTML(). '&nbsp;je ';
+    if ($result) {
+      $text .= $this->sl_druhy[$this->druh];
+    } else {
+      $text .= '<label class="select2"><select name="result1" class="select2"><option value="*"> </option>';
+      foreach($this->sl_druhy as $number => $name) {
+        $text .= '<option value="'. $number. '">'. $name. '</option>';
+      }
+      $text .= '</select></label></span>';
+    }
+    return $text;
+  }
+
+  public function getResultHTMLForm() {
+    return '';
+  }
+} // class SlovniDruhy
 
 ?>

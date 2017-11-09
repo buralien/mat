@@ -217,6 +217,16 @@ class FormulaLevelCestina3 extends GenericLevel {
     $this->formulas = array();
     $this->formulas[] = new FormulaWeight('SouhlaskyUprostredSlov', array(), 2000);
     $this->formulas[] = new FormulaWeight('DlouheUFormula', array());
+    $this->formulas[] = new FormulaWeight('SlovniDruhy', array(), 2000);
+    $this->setSubjects();
+  }
+}
+
+class TestLevel extends GenericLevel {
+  function __construct() {
+    $this->name = 'Test';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('SlovniDruhy', array());
     $this->setSubjects();
   }
 }

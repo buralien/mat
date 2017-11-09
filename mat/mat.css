@@ -79,6 +79,16 @@ h2.fail {
   cursor: pointer;
 }
 
+.select2 {
+  width: 8em;
+  height: 1.6em;
+  font-size: 36px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
 .label {
   padding: 16px;
   margin: 16px;

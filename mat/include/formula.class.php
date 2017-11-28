@@ -25,6 +25,31 @@ abstract class Formula {
     return static::$name;
   }
   public function voiceEnabled() { return false; }
+
+  protected function getNumber($max = 10, $min = 0, $low_prob = null, $exclude = null) {
+    $weight = 3;
+    if ($low_prob === null) $low_prob = array();
+    if ($exclude === null) $exclude = array(0);
+    $ex = array();
+    foreach($exclude as $n) {
+      if (($n <= $max) && ($n >= $min)) $ex[] = $n;
+    }
+    $lo = array();
+    foreach($low_prob as $n) {
+      if (($n <= $max) && ($n >= $min)) $lo[] = $n;
+    }
+    $top = ($max * $weight) - ($min * $weight) + $weight;
+    $top -= count($ex) * $weight;
+    $low = count($lo);
+    $top -=  $low * ($weight - 1);
+    if ($top < 1) $top = $low;
+    $a = mt_rand(0, ($top - 1));
+    if ($a < $low) {
+      return $lo[$a];
+    } else {
+      return floor($a / $weight) + $low + $min;
+    }
+  }
 } // class Formula
 
 class SimpleFormula extends Formula {
@@ -34,30 +59,6 @@ class SimpleFormula extends Formula {
   protected $element1;
   protected $operator;
   protected $element2;
-
-  protected $EXCLUDE_NUMBERS = array();
-  protected $LOW_PROBABILITY = array(0);
-  protected function getNumber($max = 10, $min = 0) {
-    $numbers = array();
-    if ($min > $max) $min = $max;
-    $step = (($max - $min) / 2) - 1;
-    for ($j=$min; $j<=$max; $j++) {
-      $k = (floor($j/$step) + 1);
-      for ($i=0;$i<$k;$i++) {
-        $numbers[] = $j;
-        $numbers[] = $j;
-      }
-    }
-    $numbers = array_diff($numbers, $this->EXCLUDE_NUMBERS);
-    $numbers = array_diff($numbers, $this->LOW_PROBABILITY);
-    foreach($this->LOW_PROBABILITY as $l) {
-      if (($l <= $max) && ($l >= $min)) {
-        $numbers[] = $l;
-      }
-    }
-    $numbers = array_values($numbers);
-    return $numbers[mt_rand(0, count($numbers) - 1)];
-  }
 
   function __construct ($el1, $op, $el2) {
     $this->element1 = new PrimitiveElement($el1);
@@ -107,18 +108,30 @@ class RandomSimpleFormula extends SimpleFormula {
   public static $name = 'Aritmetika';
   public static $subject = 'Matematika';
   public static $advanced = 'do {number} (operace {opmask})';
-  function __construct ($max = null, $opmask = 0) {
+  function __construct ($max = null, $opmask = null) {
     if ($max === null) {
-      $max = mt_getrandmax();
+      $max = floor(mt_getrandmax() / 4);
     } else {
       self::$name .= ' do '. $max;
     }
+    if ($opmask == null) $opmask = 0;
     do {
-      $this->element1 = new RandomPrimitiveElement($max, 1);
-      $this->element2 = new RandomPrimitiveElement($max, 1);
       $this->operator = new RandomOperatorElement($opmask);
+      if ($this->operator->getMath() == '/') {
+        do {
+          $b = $this->getNumber(floor($max / 10), 2, array(1, 10), array(0));
+          $c = $this->getNumber(ceil($max / $b), 2, array(1, 10), array(0));
+          $a = $b * $c;
+        } while (($a > $max) || ($a <= 0));
+        $this->element1 = new PrimitiveElement($b * $c);
+        $this->element2 = new PrimitiveElement($b);
+      } else {
+        $this->element1 = new RandomPrimitiveElement($max, 1);
+        $this->element2 = new RandomPrimitiveElement($max, 1);
+      }
+      print($this. '');
       $res = $this->getResult();
-    } while (($res > $max) || ($res < 0));
+    } while (($res > $max) || ($res < 0) || ($res != floor($res)));
   }
 } // class RandomSimpleFormula
 
@@ -172,14 +185,15 @@ class TripleFormula extends Formula {
 class MalaNasobilka extends SimpleFormula {
   public static $name = 'Mal&aacute; n&aacute;sobilka';
   public static $advanced = 'do {number} (&rcaron;&aacute;d {number})';
-  function __construct ($max = 10, $power = 1) {
+  function __construct ($max = null, $power = null) {
+    if ($max == null) $max = 10;
+    if ($power == null) $power = 1;
     if ($max != 10) {
       self::$name .= ' do '. $max;
     }
-    $this->LOW_PROBABILITY = array(0, 1, 10);
     $this->operator = new OperatorElement(OP_KRAT);
-    $this->element2 = new PrimitiveElement($this->getNumber($max));
-    $a = $this->getNumber(10, 1);
+    $this->element2 = new PrimitiveElement($this->getNumber($max, 0, array(0, 1, 10)));
+    $a = $this->getNumber(10, 1, array(0, 1, 10));
     for($b=2;$b<=$power;$b++) {
       if (mt_rand(1,2) == 1) $a *= 10;
     }
@@ -192,13 +206,13 @@ class MalaNasobilka extends SimpleFormula {
 class StredniNasobilka extends SimpleFormula {
   public static $name = 'N&aacute;sobilka';
   public static $advanced = 'do {number}';
-  function __construct ($max = 100) {
+  function __construct ($max = null) {
+    if ($max == null) $max = 100;
     self::$name .= ' do '. $max;
-    $this->LOW_PROBABILITY = array(10);
     do {
       $this->element1 = new PrimitiveElement($this->getNumber($max, 11));
     } while ($this->element1->getValue() % 10 == 0);
-    $this->element2 = new PrimitiveElement($this->getNumber(10, 2));
+    $this->element2 = new PrimitiveElement($this->getNumber(10, 2, array(10)));
     $this->operator = new OperatorElement(OP_KRAT);
   }
 }
@@ -206,10 +220,10 @@ class StredniNasobilka extends SimpleFormula {
 class VelkaNasobilka extends SimpleFormula {
   public static $name = 'Velk&aacute; n&aacute;sobilka';
   public static $advanced = 'do {number}';
-  function __construct () {
-    $this->LOW_PROBABILITY = array(0, 1, 10, 100);
-    $this->element1 = new PrimitiveElement($this->getNumber(100, 11));
-    $this->element2 = new PrimitiveElement($this->getNumber(100, 11));
+  function __construct ($max = null) {
+    if ($max == null) $max = 100;
+    $this->element1 = new PrimitiveElement($this->getNumber($max, 11));
+    $this->element2 = new PrimitiveElement($this->getNumber($max, 11));
     $this->operator = new OperatorElement(OP_KRAT);
   }
 }
@@ -217,23 +231,18 @@ class VelkaNasobilka extends SimpleFormula {
 class DeleniSeZbytkem extends SimpleFormula {
   public static $name = 'D&ecaron;len&iacute; se zbytkem';
   public static $advanced = 'do {number}';
-  function __construct ($max = 0, $el1 = null, $el2 = null) {
+  function __construct ($max = null, $el1 = null, $el2 = null) {
+    if ($max == null) $max = floor(mt_getrandmax() / 4);
+    self::$name .= ' do '. $max;
     $this->operator = new OperatorElement(OP_DELENO);
-    $this->EXCLUDE_NUMBERS = array(0, 1);
-    $this->LOW_PROBABILITY = array(10);
-    if ($max == 0) {
-      $max = mt_getrandmax();
-    } else {
-      self::$name .= ' do '. $max;
-    }
     if ($el2 === null) {
-      $this->element2 = new PrimitiveElement($this->getNumber(10, 2));
+      $this->element2 = new PrimitiveElement($this->getNumber(10, 2, array(10), array(0, 1)));
     } else {
       $this->element2 = new PrimitiveElement($el2);
     }
     if ($el1 === null) {
       do {
-        $this->element1 = new PrimitiveElement($this->getNumber($max, 2));
+        $this->element1 = new PrimitiveElement($this->getNumber($max, 2, array(10), array(0, 1)));
       } while (($this->element1->getValue() / $this->element2->getValue()) > ceil($max / 10));
     } else {
       $this->element1 = new PrimitiveElement($el1);
@@ -285,7 +294,9 @@ class VelkeScitani extends SimpleFormula {
   public static $name = 'S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute;';
   public static $advanced = 'do {number}';
 
-  function __construct($max = 1000) {
+  function __construct($max = null) {
+    if ($max == null) $max = 1000;
+
     self::$name .= ' do '. $max;
     do {
       $this->element1 = new RandomPrimitiveElement($max, 11);
@@ -300,7 +311,8 @@ class DvaSoucty extends TripleFormula {
   public static $name = "S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute; (3 &ccaron;&iacute;sla)";
   public static $advanced = 'do {number}';
 
-  function __construct ($max = 1000) {
+  function __construct ($max = null) {
+    if ($max == null) $max = 1000;
     self::$name .= ' do '. $max;
     do {
       $this->element1 = new RandomPrimitiveElement($max, 11);
@@ -339,7 +351,8 @@ class RomanNumerals extends Formula {
     'IV' => 4,
     'I' => 1);
 
-  function __construct($max = 2000) {
+  function __construct($max = null) {
+    if ($max == null) $max = 2000;
     $this->element = new RandomPrimitiveElement($max);
   }
 
@@ -396,11 +409,12 @@ class RomanNumerals extends Formula {
 class MultiFormula extends Formula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
   public static $subject = 'Matematika';
-  public static $advanced = '';
+  public static $advanced = 'ignore';
   protected $elements;
   protected $operators;
 
   function __construct() {
+    #TODO: must define case with too few params
     $params = func_get_args();
     if ((count($params) == 2) && (is_array($params[0])) && (is_array($params[1]))) {
       $this->elements = $params[0];
@@ -462,11 +476,13 @@ class MultiFormula extends Formula {
 
 class RandomSimpleMultiFormula extends MultiFormula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
-  public static $advanced = '{number} &ccaron;&iacute;sel od {number} do {number}';
-  function __construct($max = 0, $min = 2, $max_num = 4, $min_num = 0 ) {
-    if ($max == 0) $max = mt_getrandmax();
+  public static $advanced = 'do {number} od {number} ({number}-{number} &ccaron;&iacute;sel)';
+  function __construct($max = null, $min = null, $max_num = null, $min_num = null ) {
+    if ($max == null) $max = floor(mt_getrandmax() / 4);
+    if ($min == null) $min = 2;
+    if ($max_num == null) $max_num = 4;
+    if ($min_num == null) $min_num = 2;
     if ($min < 2) $min = 2;
-    if ($min_num == 0) $min_num = mt_getrandmax();
     if ($min_num > $max_num) $min_num = $max_num;
     $num = mt_rand($min_num, $max_num);
     $this->elements[] = new RandomPrimitiveElement($max, $min);
@@ -480,7 +496,7 @@ class RandomSimpleMultiFormula extends MultiFormula {
         $el = new RandomPrimitiveElement($max, $min);
         $f = new MultiFormula(array_merge($this->elements, array($el)), array_merge($this->operators, array($op)));
         $res = $f->getResult();
-      } while ((floor($res) < $res) or ($res < 0) or ($res > $max) or ((($el->getValue() == end($this->elements)->getValue()) || ($el->getValue() > 10) || (end($this->elements)->getValue() / 10 > $el->getValue())) && ($op->getValue() == OP_DELENO)));
+      } while ((floor($res) != $res) || ($res < 0) || ($res > $max) || ((($el->getValue() == end($this->elements)->getValue()) || ($el->getValue() > 10) || (end($this->elements)->getValue() / 10 > $el->getValue())) && ($op->getValue() == OP_DELENO)));
       $this->elements[] = new PrimitiveElement($el->getValue());
       $this->operators[] = new OperatorElement($op->getValue());
       //echo "NEXT ". $this->toStr(TRUE). "\n";
@@ -491,20 +507,17 @@ class RandomSimpleMultiFormula extends MultiFormula {
 class SimpleBracketFormula extends SimpleFormula {
   public static $name = 'Aritmetika se z&aacute;vorkou';
   public static $advanced = 'do {number}';
-  function __construct($max = 0) {
-    if ($max == 0) {
-      $max = mt_getrandmax();
-    } else {
-      self::$name .= ' do '. $max;
+  function __construct($max = null) {
+    if ($max == null) {
+      $max = floor(mt_getrandmax() / 4);
     }
-    $this->EXCLUDE_NUMBERS = array(0);
-    $this->LOW_PROBABILITY = array(1, 10);
+    self::$name .= ' do '. $max;
     do {
       do {
         $this->element1 = new RandomCombinedElement($max, 1, OP_KRAT + OP_DELENO);
         $res = $this->element1->getValue();
       } while (($res < 0) || ($res > $max) || ($res < 2));
-      $el2 = $this->getNumber(10, 2);
+      $el2 = $this->getNumber(10, 2, array(1, 10), array(0));
       $this->element2 = new PrimitiveElement($el2);
       $this->operator = new RandomOperatorElement(OP_PLUS + OP_MINUS);
       $res = $this->getResult();
@@ -518,10 +531,11 @@ class EnglishTextFormula extends Formula {
   public static $advanced = 'do {number}';
   protected $element;
 
-  function __construct($max = 100, $min = 0) {
-    if ($min < 0) $min = 0;
+  function __construct($max = null, $min = null) {
+    if ($max === null) $max = 100;
+    if (($min === null)||($min < 0)) $min = 0;
     if ($max < $min) $max = $min;
-    $this->element = new EnglishTextElement(mt_rand($min, $max));
+    $this->element = new EnglishTextElement($this->getNumber($max, $min, array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
   }
 
   public function getResult() {
@@ -623,12 +637,13 @@ class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
 class PrevodJednotek extends Formula {
   public static $name = 'P&rcaron;evod jednotek';
   public static $subject = 'Matematika';
-  public static $advanced = '';
+  public static $advanced = 'ignore';
   private $element;
   private $sourceprefix;
   private $targetprefix;
 
-  function __construct($maxprefix = null, $minprefix = null, $maxvalue = 100, $units = null) {
+  function __construct($maxprefix = null, $minprefix = null, $maxvalue = null, $units = null) {
+    if($maxvalue === null) $maxvalue = 100;
 
     # Generate source and target prefixes
     $prefix1 = RandomPhysicsElement::randomPrefix($minprefix, $maxprefix);
@@ -647,7 +662,7 @@ class PrevodJednotek extends Formula {
 
     # Generate the value (number)
     if (PhysicsElement::getPower($this->sourceprefix) > PhysicsElement::getPower($this->targetprefix)) {
-      $value = mt_rand(1,10);
+      $value = mt_rand(1, 10);
     } else {
       $minvalue = pow(10, floor(log10($maxvalue)));
       $value = mt_rand($minvalue, $maxvalue);
@@ -693,95 +708,10 @@ class PrevodJednotek extends Formula {
   }
 }  // class PrevodJednotek
 
-/*
-class VyjmenovanaSlovaOld extends Formula {
-  public static $name = 'Vyjmenovan&aacute; slova';
-  public static $subject = '&Ccaron;e&scaron;tina';
-  public static $advanced = '';
-  protected $element;
-  protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
-  protected $dict;
-
-  function __construct($letter = null) {
-    switch ($letter) {
-      case 'i': case 'í': $this->dict = 'include/slovnik-i.dict'; break;
-      case 'y': case 'ý': $this->dict = 'include/slovnik-y.dict'; break;
-      default: $this->dict = $this->dict_source[mt_rand(0, 1)];
-    }
-    $this->element = new RandomWordElement($this->dict);
-  }
-  protected function getBlank() {
-    return strtr($this->element, 'iy', '__');
-  }
-  protected function blankReplace($haystack, $repl) {
-    return implode($repl, explode('_', $haystack, 2));
-  }
-
-  public function toHTML($result = FALSE) {
-    $text = '<span class="formula">';
-    if ($result) {
-      $text .= $this->element->toHTML();
-    } else {
-      $form = $this->getBlank();
-      $rescount = 1;
-      $text .= '<label class="select">';
-      while (strpos($form, '_') !== false) {
-        $input = '<select name="result'. $rescount. '" class="select"><option value="*"> </option><option value="i">i</option><option value="y">y</option></select>';
-        $form = $this->blankReplace($form, $input);
-        $rescount++;
-        if ($rescount > 256) break;
-      }
-      $text .= $form. '</label></span>';
-    }
-    return $text;
-  }
-  public function toStr($result = FALSE) {
-    if ($result) {
-      return $this->getBlank(). ' = '. $this->element->toStr();
-    } else {
-      return $this->getBlank();
-    }
-  }
-
-  public function getResult() {
-    $text = $this->getBlank();
-    $result = array();
-    while (($i = strpos($text, '_')) !== false) {
-      $result[] = $this->element->toStr()[$i];
-      $text = $this->blankReplace($text, '*');
-    }
-    return $result;
-  }
-
-  public function getResultHTMLForm() {
-    return '';
-  }
-
-  public function validateResult($input) {
-    if (is_array($input)) {
-      $form = $this->getBlank();
-      if (count($input) != substr_count($form, '_')) return false;
-      while (strpos($form, '_') !== false) {
-        $form = $this->blankReplace($form, array_shift($input));
-      }
-      foreach ($this->dict_source as $dict) {
-        if ($handle = fopen($dict, 'r')) {
-          while($line = stream_get_line($handle, 256, "\n")) {
-            if ($line == $form) return true;
-          }
-        }
-        fclose($handle);
-      }
-    }
-    return false;
-  }
-} // class VyjmenovanaSlova
-*/
-
 class SouhlaskyUprostredSlov extends Formula {
   public static $name = 'Souhl&aacute;sky uprost&rcaron;ed slova';
   public static $subject = '&Ccaron;e&scaron;tina';
-  public static $advanced = '';
+  public static $advanced = ''; #TODO: allow to choose individual dictionaries
   protected $element;
   protected $dict_source = array('include/slovnik-bp.dict', 'include/slovnik-dt.dict', 'include/slovnik-sz.dict', 'include/slovnik-vf.dict');
   protected $dict;

@@ -165,11 +165,17 @@ if (count($advanced_data) > 0) {
   foreach($advanced_data as $a) {
     if (isset($a['value'])) {
       if ($a['value'] == 'yes') {
-        if (isset($a['opmask'])) $a['param'][999] = $a['opmask'];
+        if (isset($a['opmask'])) {
+          if ($a['opmask'] < (OP_PLUS + OP_MINUS + OP_KRAT + OP_DELENO)) {
+            $a['param'][999] = $a['opmask'];
+          } else {
+            $a['param'][999] = 0;
+          }
+        }
         if ((isset($a['param'])) && (count($a['param']) > 0)) {
           foreach(array_keys($a['param']) as $pk) {
             # Clean empty params passed from advanced settings
-            if (!$a['param'][$pk]) unset($a['param'][$pk]);
+            if (!$a['param'][$pk]) $a['param'][$pk] = null;
           }
           $custom_level->addFormula($a['clsid'], array_values($a['param']));
         } else {

@@ -104,7 +104,7 @@ abstract class GenericLevel {
 class CustomLevel extends GenericLevel {
   function __construct () {
     $this->formulas = array();
-    $this->name = 'Pokrocile nastaveni';
+    $this->name = 'Pokročilé nastavení';
   }
 
   public function addFormula($clsid, $params = null) {

@@ -98,22 +98,25 @@ class SouhlaskyUprostredSlov extends Formula {
   }
 
   public function validateResult($input) {
+    $ret = false;
     if (is_array($input)) {
       $form = $this->getBlank();
       if (count($input) != substr_count($form, '_')) return false;
       while (strpos($form, '_') !== false) {
         $form = $this->blankReplace($form, array_shift($input));
       }
-      foreach ($this->dict_source as $dict) {
-        if ($handle = fopen($dict, 'r')) {
-          while($line = stream_get_line($handle, 256, "\n")) {
-            if ($line == $form) return true;
+      if (MAT_DEBUG) print("Checking $form in ". $this->dict);
+      if ($handle = fopen($this->dict, 'r')) {
+        while($line = stream_get_line($handle, 256, "\n")) {
+          if (trim($line) == trim($form)) {
+            $ret = true;
+            break;
           }
         }
         fclose($handle);
       }
     }
-    return false;
+    return $ret;
   }
 } // class SouhlaskyUprostredSlov
 

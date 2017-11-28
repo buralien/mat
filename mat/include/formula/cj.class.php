@@ -29,7 +29,14 @@ class SouhlaskyUprostredSlov extends Formula {
         break;
       default:
         $this->dict = $this->dict_source[mt_rand(0, count($this->dict_source) - 1)];
-        $this->toreplace = str_split(substr($this->dict, 16, 2));
+        # this stupid sequence of calls is due to Strict Mode
+        $a = explode('/', $this->dict);
+        $a = end($a);
+        $a = explode('-', $a);
+        $a = end($a);
+        $a = explode('.', $a);
+        $a = reset($a);
+        $this->toreplace = str_split($a);
     }
     if (in_array('d', $this->toreplace)) {
       $this->toreplace[] = 'ď';

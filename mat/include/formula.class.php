@@ -329,7 +329,7 @@ class RomanNumerals extends Formula {
     'I' => 1);
 
   function __construct($max = 2000) {
-    $this->element = new RandomPrimitiveElement($max);
+    $this->element = new RandomPrimitiveElement($max, 1);
   }
 
   private function toRoman() {

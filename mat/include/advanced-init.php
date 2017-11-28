@@ -18,12 +18,12 @@ class InputGenerator {
   public function getOpMask($name) {
     $name = 'advanced_'. $name. '_'. ++$this->number;
     $text =  '<input type="checkbox" name="'. $name. '_plus" id="'. $name. '_plus" value="yes" checked="checked">';
-    $text .= '<label for="'. $name. '_plus">+</label>';
+    $text .= '<label for="'. $name. '_plus">+</label> ';
     $text .= '<input type="checkbox" name="'. $name. '_minus" id="'. $name. '_minus" value="yes" checked="checked">';
-    $text .= '<label for="'. $name. '_minus">-</label>';
-    $text .= '<input type="checkbox" name="'. $name. '_deleno" id="'. $name. '_deleno" value="yes" checked="checked">';
-    $text .= '<label for="'. $name. 'krat">&times;</label>';
+    $text .= '<label for="'. $name. '_minus">-</label> ';
     $text .= '<input type="checkbox" name="'. $name. '_krat" id="'. $name. '_krat" value="yes" checked="checked">';
+    $text .= '<label for="'. $name. '_krat">&times;</label> ';
+    $text .= '<input type="checkbox" name="'. $name. '_deleno" id="'. $name. '_deleno" value="yes" checked="checked">';
     $text .= '<label for="'. $name. '_deleno">&divide;</label>';
 
     return $text;
@@ -105,7 +105,7 @@ foreach (getDeclaredFormulas() as $formula) {
   if (strlen($formula::$advanced) > 0) {
     $subj_form[$formula::$subject][] = ' ';
     $adv = explode('{', str_replace('}', '{', $formula::$advanced));
-    if (MAT_DEBUG) $html->addBodyContent('<pre>Adv: '. print_r($adv, true). '</pre>');
+    # if (MAT_DEBUG) $html->addBodyContent('<pre>Adv: '. print_r($adv, true). '</pre>');
     foreach($adv as $part) {
       if($part == 'number') $subj_form[$formula::$subject][] = $inputs->getNumber($name);
       elseif ($part == 'opmask') $subj_form[$formula::$subject][] = $inputs->getOpMask($name);

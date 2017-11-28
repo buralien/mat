@@ -5,26 +5,26 @@ class SouhlaskyUprostredSlov extends Formula {
   public static $subject = '&Ccaron;e&scaron;tina';
   public static $advanced = ''; #TODO: allow to choose individual dictionaries
   protected $element;
-  protected $dict_source = array('include/slovnik-bp.dict', 'include/slovnik-dt.dict', 'include/slovnik-sz.dict', 'include/slovnik-vf.dict');
+  protected $dict_source = array('include/dict/slovnik-bp.dict', 'include/dict/slovnik-dt.dict', 'include/dict/slovnik-sz.dict', 'include/dict/slovnik-vf.dict');
   protected $dict;
   protected $toreplace;
 
   function __construct($letter = null) {
     switch ($letter) {
       case 'b':
-        $this->dict = 'include/slovnik-bp.dict';
+        $this->dict = 'include/dict/slovnik-bp.dict';
         $this->toreplace = array('b', 'p');
         break;
       case 'd':
-        $this->dict = 'include/slovnik-dt.dict';
+        $this->dict = 'include/dict/slovnik-dt.dict';
         $this->toreplace = array('d', 't');
         break;
       case 's':
-        $this->dict = 'include/slovnik-sz.dict';
+        $this->dict = 'include/dict/slovnik-sz.dict';
         $this->toreplace = array('s', 'z');
         break;
       case 'v':
-        $this->dict = 'include/slovnik-vf.dict';
+        $this->dict = 'include/dict/slovnik-vf.dict';
         $this->toreplace = array('v', 'f');
         break;
       default:
@@ -120,15 +120,15 @@ class SouhlaskyUprostredSlov extends Formula {
 class VyjmenovanaSlova extends SouhlaskyUprostredSlov {
   public static $name = 'Vyjmenovan&aacute; slova';
   public static $advanced = '';
-  protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
+  protected $dict_source = array('include/dict/slovnik-i.dict', 'include/dict/slovnik-y.dict');
 
   function __construct($letter = null) {
     switch ($letter) {
       case 'i':
-        $this->dict = 'include/slovnik-i.dict';
+        $this->dict = 'include/dict/slovnik-i.dict';
         break;
       case 'y':
-        $this->dict = 'include/slovnik-y.dict';
+        $this->dict = 'include/dict/slovnik-y.dict';
         break;
       default:
         $this->dict = $this->dict_source[mt_rand(0, count($this->dict_source) - 1)];
@@ -172,10 +172,10 @@ class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
 class DlouheUFormula extends SouhlaskyUprostredSlov {
   public static $name = 'Dlouh&eacute; u';
   public static $advanced = '';
-  protected $dict_source = array('include/slovnik-u.dict');
+  protected $dict_source = array('include/dict/slovnik-u.dict');
 
   function __construct() {
-    $this->dict = 'include/slovnik-u.dict';
+    $this->dict = 'include/dict/slovnik-u.dict';
     $this->toreplace = array('ú', 'ů');
     $this->element = new RandomWordElement($this->dict);
   }
@@ -184,7 +184,7 @@ class DlouheUFormula extends SouhlaskyUprostredSlov {
 class SkladbaSlova extends SouhlaskyUprostredSlov {
   public static $name = 'Skladba slova';
   public static $advanced = '';
-  protected $dict_source = array('include/slovnik-bevepe.dict', 'include/slovnik-me.dict');
+  protected $dict_source = array('include/dict/slovnik-bevepe.dict', 'include/dict/slovnik-me.dict');
 
   function __construct($letter = null) {
     $this->dict = $this->dict_source[mt_rand(0, count($this->dict_source) - 1)];

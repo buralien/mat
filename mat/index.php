@@ -124,8 +124,33 @@ if (!isset($_SESSION['nofail'])) {
 
 # Looking for POST values of results and initial setup
 $results = array();
+$advanced_data = array();
 foreach ($_POST as $key => $val) {
   if (strpos($key, 'result') === 0) $results[$key] = htmlspecialchars($val);
+  if (strpos($key, 'advanced_') === 0) {
+    $k = explode('_', $key);
+    $key_name = $k[1];
+    if (count($k) > 2) {
+      $key_param = $k[2];
+      if (is_numeric($key_param)) {
+        if (isset($k[3])) {
+          if (!isset($advanced_data[$key_name]['opmask'])) $advanced_data[$key_name]['opmask'] = OP_PLUS + OP_MINUS + OP_KRAT + OP_DELENO;
+          switch($k[3]) {
+            case 'plus': $advanced_data[$key_name]['opmask'] -= OP_PLUS; break;
+            case 'minus': $advanced_data[$key_name]['opmask'] -= OP_MINUS; break;
+            case 'krat': $advanced_data[$key_name]['opmask'] -= OP_KRAT; break;
+            case 'deleno': $advanced_data[$key_name]['opmask'] -= OP_DELENO; break;
+          }
+        } else {
+          $advanced_data[$key_name]['param'][] = $val;
+        }
+      } else {
+        $advanced_data[$key_name][$key_param] = $val;
+      }
+    } elseif (count($k) == 2) {
+      $advanced_data[$key_name]['value'] = $val;
+    }
+  }
   if (($key == 'nofail') && ($val == 'yes')) $_SESSION['nofail'] = 'yes';
   if (($key == 'countleft') && (is_numeric($val))) $_SESSION['countleft'] = intval($val);
   if (($key == 'difficulty') && (is_numeric($val))) $_SESSION['difficulty'] = intval($val);
@@ -134,6 +159,29 @@ foreach ($_POST as $key => $val) {
     $level = new $clsid();
   }
 }
+
+if (count($advanced_data) > 0) {
+  $custom_level = new CustomLevel();
+  foreach($advanced_data as $a) {
+    if (isset($a['value'])) {
+      if ($a['value'] == 'yes') {
+        if (isset($a['opmask'])) $a['param'][999] = $a['opmask'];
+        if ((isset($a['param'])) && (count($a['param']) > 0)) {
+          foreach(array_keys($a['param']) as $pk) {
+            # Clean empty params passed from advanced settings
+            if (!$a['param'][$pk]) unset($a['param'][$pk]);
+          }
+          $custom_level->addFormula($a['clsid'], array_values($a['param']));
+        } else {
+          $custom_level->addFormula($a['clsid']);
+        }
+      }
+    }
+  }
+  if (MAT_DEBUG) $html->addBodyContent('Advanced: <pre>'. print_r($custom_level, true). '</pre>');
+  $level = $custom_level;
+}
+
 if (MAT_DEBUG) $html->addBodyContent('Level: <pre>'. print_r($level, true). '</pre>');
 if (MAT_DEBUG) $html->addBodyContent('Check: <pre>'. print_r($check, true). '</pre>');
 
@@ -142,7 +190,11 @@ if ( $_SESSION['countleft'] === null ) {
   # No setup was done yet, reset SESSION and display the initial page
   session_destroy();
   $_SESSION = array();
-  include 'include/init.php';
+  if (isset($_POST['advanced'])) {
+    include 'include/advanced-init.php';
+  } else {
+    include 'include/init.php';
+  }
   include 'include/footer.php';
   $html->display();
   die();

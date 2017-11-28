@@ -1,6 +1,7 @@
 <?php
 
 $html->addBodyContent('<h1>MAT - nastaven&iacute;</h1>');
+$html->addBodyContent('<form method=post><input type="submit" name="advanced" value="Pokročilé nastavení" class="init"></form>');
 $js = <<<JS
 //<![CDATA[
 function start() {

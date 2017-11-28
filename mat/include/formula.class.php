@@ -4,6 +4,7 @@ require_once 'element.class.php';
 abstract class Formula {
   public static $name;
   public static $subject;
+  public static $advanced;
   abstract public function toHTML($result = FALSE);
   abstract public function toStr($result = FALSE);
   abstract public function getResult();
@@ -29,6 +30,7 @@ abstract class Formula {
 class SimpleFormula extends Formula {
   public static $name = 'Aritmetika';
   public static $subject = 'Matematika';
+  public static $advanced = 'ignore';
   protected $element1;
   protected $operator;
   protected $element2;
@@ -90,7 +92,7 @@ class SimpleFormula extends Formula {
   public function toHTML ($result = FALSE) {
     $html = '<span class="formula">';
     $html .= $this->element1->toHTML() . ' ';
-    $html .= $this->operator->toHTML() . '&nbsp;'; 
+    $html .= $this->operator->toHTML() . '&nbsp;';
     $html .= $this->element2->toHTML(). ' =&nbsp;';
     if ($result) {
       $html .= '<span class="result">'. $this->getResult(). '</span>';
@@ -104,6 +106,7 @@ class SimpleFormula extends Formula {
 class RandomSimpleFormula extends SimpleFormula {
   public static $name = 'Aritmetika';
   public static $subject = 'Matematika';
+  public static $advanced = 'do {number} (operace {opmask})';
   function __construct ($max = null, $opmask = 0) {
     if ($max === null) {
       $max = mt_getrandmax();
@@ -122,6 +125,7 @@ class RandomSimpleFormula extends SimpleFormula {
 class TripleFormula extends Formula {
   public static $name = "Aritmetika (3 &ccaron;&iacute;sla)";
   public static $subject = 'Matematika';
+  public static $advanced = 'ignore';
   protected $element1;
   protected $operator1;
   protected $element2;
@@ -153,9 +157,9 @@ class TripleFormula extends Formula {
   public function toHTML ($result = FALSE) {
     $html = '<span class="formula">';
     $html .= $this->element1->toHTML() . ' ';
-    $html .= $this->operator1->toHTML() . '&nbsp;'; 
+    $html .= $this->operator1->toHTML() . '&nbsp;';
     $html .= $this->element2->toHTML() . ' ';
-    $html .= $this->operator2->toHTML() . '&nbsp;'; 
+    $html .= $this->operator2->toHTML() . '&nbsp;';
     $html .= $this->element3->toHTML(). ' =&nbsp;';
     if ($result) {
       $html .= '<span class="result">'. $this->getResult(). '</span>';
@@ -167,6 +171,7 @@ class TripleFormula extends Formula {
 
 class MalaNasobilka extends SimpleFormula {
   public static $name = 'Mal&aacute; n&aacute;sobilka';
+  public static $advanced = 'do {number} (&rcaron;&aacute;d {number})';
   function __construct ($max = 10, $power = 1) {
     if ($max != 10) {
       self::$name .= ' do '. $max;
@@ -186,6 +191,7 @@ class MalaNasobilka extends SimpleFormula {
 
 class StredniNasobilka extends SimpleFormula {
   public static $name = 'N&aacute;sobilka';
+  public static $advanced = 'do {number}';
   function __construct ($max = 100) {
     self::$name .= ' do '. $max;
     $this->LOW_PROBABILITY = array(10);
@@ -199,6 +205,7 @@ class StredniNasobilka extends SimpleFormula {
 
 class VelkaNasobilka extends SimpleFormula {
   public static $name = 'Velk&aacute; n&aacute;sobilka';
+  public static $advanced = 'do {number}';
   function __construct () {
     $this->LOW_PROBABILITY = array(0, 1, 10, 100);
     $this->element1 = new PrimitiveElement($this->getNumber(100, 11));
@@ -209,12 +216,13 @@ class VelkaNasobilka extends SimpleFormula {
 
 class DeleniSeZbytkem extends SimpleFormula {
   public static $name = 'D&ecaron;len&iacute; se zbytkem';
+  public static $advanced = 'do {number}';
   function __construct ($max = 0, $el1 = null, $el2 = null) {
     $this->operator = new OperatorElement(OP_DELENO);
     $this->EXCLUDE_NUMBERS = array(0, 1);
     $this->LOW_PROBABILITY = array(10);
-    if ($max == 0) { 
-      $max = mt_getrandmax(); 
+    if ($max == 0) {
+      $max = mt_getrandmax();
     } else {
       self::$name .= ' do '. $max;
     }
@@ -254,7 +262,7 @@ class DeleniSeZbytkem extends SimpleFormula {
   public function toHTML ($result = FALSE) {
     $html = '<span class="formula">';
     $html .= $this->element1->toHTML() . '&nbsp;';
-    $html .= $this->operator->toHTML() . '&nbsp;'; 
+    $html .= $this->operator->toHTML() . '&nbsp;';
     $html .= $this->element2->toHTML(). '&nbsp;=&nbsp;';
     if ($result) {
       $res = $this->getResult();
@@ -275,7 +283,8 @@ class DeleniSeZbytkem extends SimpleFormula {
 
 class VelkeScitani extends SimpleFormula {
   public static $name = 'S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute;';
-  public static $subject = 'Matematika';
+  public static $advanced = 'do {number}';
+
   function __construct($max = 1000) {
     self::$name .= ' do '. $max;
     do {
@@ -289,7 +298,8 @@ class VelkeScitani extends SimpleFormula {
 
 class DvaSoucty extends TripleFormula {
   public static $name = "S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute; (3 &ccaron;&iacute;sla)";
-  public static $subject = 'Matematika';
+  public static $advanced = 'do {number}';
+
   function __construct ($max = 1000) {
     self::$name .= ' do '. $max;
     do {
@@ -312,6 +322,7 @@ class DvaSoucty extends TripleFormula {
 class RomanNumerals extends Formula {
   public static $name = '&Rcaron;&iacute;msk&eacute; &ccaron;&iacute;slice';
   public static $subject = 'Matematika';
+  public static $advanced = 'do {number}';
   private $element;
   private $lookup = array(
     'M' => 1000,
@@ -385,6 +396,7 @@ class RomanNumerals extends Formula {
 class MultiFormula extends Formula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
   public static $subject = 'Matematika';
+  public static $advanced = '';
   protected $elements;
   protected $operators;
 
@@ -450,7 +462,7 @@ class MultiFormula extends Formula {
 
 class RandomSimpleMultiFormula extends MultiFormula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
-  public static $subject = 'Matematika';
+  public static $advanced = '{number} &ccaron;&iacute;sel od {number} do {number}';
   function __construct($max = 0, $min = 2, $max_num = 4, $min_num = 0 ) {
     if ($max == 0) $max = mt_getrandmax();
     if ($min < 2) $min = 2;
@@ -478,7 +490,7 @@ class RandomSimpleMultiFormula extends MultiFormula {
 
 class SimpleBracketFormula extends SimpleFormula {
   public static $name = 'Aritmetika se z&aacute;vorkou';
-  public static $subject = 'Matematika';
+  public static $advanced = 'do {number}';
   function __construct($max = 0) {
     if ($max == 0) {
       $max = mt_getrandmax();
@@ -503,6 +515,7 @@ class SimpleBracketFormula extends SimpleFormula {
 class EnglishTextFormula extends Formula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky';
   public static $subject = 'Angli&ccaron;tina';
+  public static $advanced = 'do {number}';
   protected $element;
 
   function __construct($max = 100, $min = 0) {
@@ -539,7 +552,6 @@ class EnglishTextFormula extends Formula {
 
 class ReverseEnglishTextFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (z &ccaron;&iacute;sel)';
-  public static $subject = 'Angli&ccaron;tina';
 
   public function getResult() {
     return $this->element->toStr();
@@ -576,7 +588,6 @@ class ReverseEnglishTextFormula extends EnglishTextFormula {
 
 class EnglishSpeechFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - &ccaron;&iacute;sla)';
-  public static $subject = 'Angli&ccaron;tina';
 
   public function voiceEnabled() { return true; }
 
@@ -594,7 +605,6 @@ class EnglishSpeechFormula extends EnglishTextFormula {
 
 class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - slova)';
-  public static $subject = 'Angli&ccaron;tina';
 
   public function voiceEnabled() { return true; }
 
@@ -613,6 +623,7 @@ class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
 class PrevodJednotek extends Formula {
   public static $name = 'P&rcaron;evod jednotek';
   public static $subject = 'Matematika';
+  public static $advanced = '';
   private $element;
   private $sourceprefix;
   private $targetprefix;
@@ -682,9 +693,11 @@ class PrevodJednotek extends Formula {
   }
 }  // class PrevodJednotek
 
+/*
 class VyjmenovanaSlovaOld extends Formula {
   public static $name = 'Vyjmenovan&aacute; slova';
   public static $subject = '&Ccaron;e&scaron;tina';
+  public static $advanced = '';
   protected $element;
   protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
   protected $dict;
@@ -763,42 +776,12 @@ class VyjmenovanaSlovaOld extends Formula {
     return false;
   }
 } // class VyjmenovanaSlova
-
-class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
-  public static $name = 'Vyjmenovan&aacute; slova (dikt&aacute;t)';
-  public static $subject = '&Ccaron;e&scaron;tina';
-
-  public function voiceEnabled() { return true; }
-
-  public function toHTML($result = FALSE) {
-    if ($result) {
-      return parent::toHTML(true);
-    } else {
-      $text = '<span class="formula">';
-      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\", \"Czech Female\", {rate: 0.7, volume: 1});document.forms[0].elements[1].focus();' type='button' value='Poslech' />";
-      $text .= '</span>';
-      return $text;
-    }
-  }
-
-  public function getResult() {
-    return $this->element->getValue();
-  }
-
-  public function getResultHTMLForm() {
-    return '<input type="text" class="result" name="result1" autocomplete="off" autofocus /> (napi&scaron; jak sly&scaron;&iacute;&scaron;)';
-  }
-
-  public function validateResult($input) {
-    if (is_array($input)) $input = implode(' ', $input);
-    $input = strtolower($input);
-    return ( $this->getResult() == $input );
-  }
-} // class VyjmenovanaSlovaDiktat
+*/
 
 class SouhlaskyUprostredSlov extends Formula {
   public static $name = 'Souhl&aacute;sky uprost&rcaron;ed slova';
   public static $subject = '&Ccaron;e&scaron;tina';
+  public static $advanced = '';
   protected $element;
   protected $dict_source = array('include/slovnik-bp.dict', 'include/slovnik-dt.dict', 'include/slovnik-sz.dict', 'include/slovnik-vf.dict');
   protected $dict;
@@ -914,7 +897,7 @@ class SouhlaskyUprostredSlov extends Formula {
 
 class VyjmenovanaSlova extends SouhlaskyUprostredSlov {
   public static $name = 'Vyjmenovan&aacute; slova';
-  public static $subject = '&Ccaron;e&scaron;tina';
+  public static $advanced = '';
   protected $dict_source = array('include/slovnik-i.dict', 'include/slovnik-y.dict');
 
   function __construct($letter = null) {
@@ -933,12 +916,43 @@ class VyjmenovanaSlova extends SouhlaskyUprostredSlov {
   }
 }
 
+class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
+  public static $name = 'Vyjmenovan&aacute; slova (dikt&aacute;t)';
+
+  public function voiceEnabled() { return true; }
+
+  public function toHTML($result = FALSE) {
+    if ($result) {
+      return parent::toHTML(true);
+    } else {
+      $text = '<span class="formula">';
+      $text .= "<input class='speech' onclick='responsiveVoice.speak(\"". $this->element->toStr(true). "\", \"Czech Female\", {rate: 0.7, volume: 1});document.forms[0].elements[1].focus();' type='button' value='Poslech' />";
+      $text .= '</span>';
+      return $text;
+    }
+  }
+
+  public function getResult() {
+    return $this->element->getValue();
+  }
+
+  public function getResultHTMLForm() {
+    return '<input type="text" class="result" name="result1" autocomplete="off" autofocus /> (napi&scaron; jak sly&scaron;&iacute;&scaron;)';
+  }
+
+  public function validateResult($input) {
+    if (is_array($input)) $input = implode(' ', $input);
+    $input = strtolower($input);
+    return ( $this->getResult() == $input );
+  }
+} // class VyjmenovanaSlovaDiktat
+
 class DlouheUFormula extends SouhlaskyUprostredSlov {
   public static $name = 'Dlouh&eacute; u';
-  public static $subject = '&Ccaron;e&scaron;tina';
+  public static $advanced = '';
   protected $dict_source = array('include/slovnik-u.dict');
 
-  function __construct($letter = null) {
+  function __construct() {
     $this->dict = 'include/slovnik-u.dict';
     $this->toreplace = array('ú', 'ů');
     $this->element = new RandomWordElement($this->dict);
@@ -947,7 +961,7 @@ class DlouheUFormula extends SouhlaskyUprostredSlov {
 
 class SkladbaSlova extends SouhlaskyUprostredSlov {
   public static $name = 'Skladba slova';
-  public static $subject = '&Ccaron;e&scaron;tina';
+  public static $advanced = '';
   protected $dict_source = array('include/slovnik-bevepe.dict', 'include/slovnik-me.dict');
 
   function __construct($letter = null) {
@@ -998,6 +1012,7 @@ class SlovniDruhy extends Formula {
   protected $druh;
   public static $name = 'Slovn&iacute; druhy';
   public static $subject = '&Ccaron;e&scaron;tina';
+  public static $advanced = '';
   protected $dict_source = array(
     1 => 'include/druh-podstatne.dict',
     2 => 'include/druh-pridavne.dict',

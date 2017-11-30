@@ -246,14 +246,14 @@ class SlovniDruhy extends Formula {
   public static $subject = '&Ccaron;e&scaron;tina';
   public static $advanced = '';
   protected $dict_source = array(
-    1 => 'include/druh-podstatne.dict',
-    2 => 'include/druh-pridavne.dict',
-    3 => 'include/druh-zajmeno.dict',
-    4 => 'include/druh-cislovka.dict',
-    5 => 'include/druh-sloveso.dict',
-    6 => 'include/druh-prislovce.dict',
-    7 => 'include/druh-predlozka.dict',
-    8 => 'include/druh-spojka.dict'
+    1 => 'include/dict/druh-podstatne.dict',
+    2 => 'include/dict/druh-pridavne.dict',
+    3 => 'include/dict/druh-zajmeno.dict',
+    4 => 'include/dict/druh-cislovka.dict',
+    5 => 'include/dict/druh-sloveso.dict',
+    6 => 'include/dict/druh-prislovce.dict',
+    7 => 'include/dict/druh-predlozka.dict',
+    8 => 'include/dict/druh-spojka.dict'
   );
   protected $sl_druhy = array(
     1 => 'Podstatn&eacute; jm&eacute;no',

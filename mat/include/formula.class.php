@@ -26,28 +26,54 @@ abstract class Formula {
   }
   public function voiceEnabled() { return false; }
 
-  protected function getNumber($max = 10, $min = 0, $low_prob = null, $exclude = null) {
-    $weight = 3;
+  protected function getNumber($max = 10, $min = 0, $low_prob = null, $exclude = null, $weight = 3) {
     if ($low_prob === null) $low_prob = array();
     if ($exclude === null) $exclude = array(0);
+
     $ex = array();
     foreach($exclude as $n) {
       if (($n <= $max) && ($n >= $min)) $ex[] = $n;
     }
+
     $lo = array();
     foreach($low_prob as $n) {
-      if (($n <= $max) && ($n >= $min)) $lo[] = $n;
+      if (($n <= $max) && ($n >= $min) && (!in_array($n, $ex))) $lo[] = $n;
     }
-    $top = ($max * $weight) - ($min * $weight) + $weight;
-    $top -= count($ex) * $weight;
     $low = count($lo);
-    $top -=  $low * ($weight - 1);
+
+    $top = (1 + $max - $min - $low) * $weight;
+    $top -= count($ex) * $weight;
+    $top +=  $low;
     if ($top < 1) $top = $low;
+
     $a = mt_rand(0, ($top - 1));
     if ($a < $low) {
       return $lo[$a];
     } else {
-      return floor($a / $weight) + $low + $min;
+      $a -= $low;
+
+      while (in_array($min, $ex)) {
+        $min++;
+      }
+      $corr = 0;
+      while (in_array($min, $lo)) {
+        $min++;
+        $corr++;
+      }
+
+      $b = floor($a / $weight) + $min;
+
+      foreach($ex as $e) {
+        if ($b >= $e) $b++;
+      }
+
+      $b -= $corr;
+
+      foreach($lo as $l) {
+        if ($b >= $l) $b++;
+      }
+
+      return $b;
     }
   }
 } // class Formula

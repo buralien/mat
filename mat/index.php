@@ -21,6 +21,8 @@ require_once 'HTML/Page2.php';
 
 define('MAT_DEBUG', 0); # Set to one to see debug output on the page
 define('POCATECNI_POCET', 10); # Default number of formulas to solve
+define('BREAK_AFTER', 30);
+define('BREAK_LENGTH', 5);
 
 # List of allowed formula levels (see level.class.php)
 $levels = array(
@@ -40,7 +42,7 @@ $levels = array(
 
 function sayTime($timestamp) {
   # Return the time difference as natural text
-  $t = time() - $timestamp;
+  $t = abs(time() - $timestamp);
   $ret = array();
   if ($t % 60 > 0) {
     $ret[] = ($t % 60). ' sekund';
@@ -78,32 +80,10 @@ data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAA
 FAVICON;
 $html->addHeadLink($favicon, 'icon');
 
-$js = <<<JS
-function fade(element) {
-var op = 2;
-var timer = setInterval(function () {
-    if (op <= 0.2){
-        clearInterval(timer);
-        op = 0
-    }
-    element.style.opacity = op;
-    element.style.filter = 'alpha(opacity=' + op * 50 + ")";
-    op -= op * 0.05;
-}, 100);
-}
-JS;
-$html->addScriptDeclaration($js);
-
-if (MAT_DEBUG) $html->addBodyContent('Session: <pre>'. print_r($_SESSION, true). '</pre>');
+if (MAT_DEBUG) $html->addBodyContent('Initial Session: <pre>'. print_r($_SESSION, true). '</pre>');
 if (MAT_DEBUG) $html->addBodyContent('POST: <pre>'. print_r($_POST, true). '</pre>');
 
 # Looking for all the different variables passed through SESSION
-if (isset($_SESSION['level'])) {
-  $level = decryptObject($_SESSION['level']);
-  $level->solved += 1;
-} else {
-  $level = new FormulaLevelNasobilka();
-}
 if (isset($_SESSION['priklad'])) {
   $check = decryptObject($_SESSION['priklad']);
 } else {
@@ -120,6 +100,33 @@ if (!isset($_SESSION['countleft'])) {
 }
 if (!isset($_SESSION['nofail'])) {
   $_SESSION['nofail'] = "no";
+}
+if (!isset($_SESSION['breakend'])) {
+  $_SESSION['breakend'] = 0;
+}
+
+$time = time();
+$break_just_started = false;
+if (!isset($_SESSION['breakstart'])) { // initial setup
+  $_SESSION['breakstart'] = $time + (BREAK_AFTER * 60);
+} elseif (is_numeric($_SESSION['breakstart'])) { // we know when to start a break
+  if ($time > $_SESSION['breakstart']) { // time for a break
+    if ($_SESSION['breakend'] === 0) { // first time on this break
+      $_SESSION['breakend'] = $time + (BREAK_LENGTH * 60); // define end of break
+      $break_just_started = true;
+    }
+    if($time > $_SESSION['breakend']) { // break is over
+      $_SESSION['breakstart'] = $time + (BREAK_AFTER * 60); // define time for next break
+      $_SESSION['breakend'] = 0;
+    }
+  }
+}
+
+if (isset($_SESSION['level'])) {
+  $level = decryptObject($_SESSION['level']);
+  if ($_SESSION['breakend'] < $time || $break_just_started) $level->solved += 1;
+} else {
+  $level = new FormulaLevelNasobilka();
 }
 
 # Looking for POST values of results and initial setup
@@ -210,10 +217,27 @@ if ( $_SESSION['countleft'] === null ) {
   $level->max_formulas = $_SESSION['countleft'];
 }
 
+$js = <<<JS
+function fade(element) {
+var op = 2;
+var timer = setInterval(function () {
+    if (op <= 0.2){
+        clearInterval(timer);
+        op = 0
+    }
+    element.style.opacity = op;
+    element.style.filter = 'alpha(opacity=' + op * 50 + ")";
+    op -= op * 0.05;
+}, 100);
+}
+JS;
+$html->addScriptDeclaration($js);
+
 $spatne = FALSE;
 $priklad = null;
 $result_msg = '';
-if ($check !== null) {
+//if (($check !== null) && (!$break_just_started) && ($_SESSION['breakend'] > 0)) {
+if ($check !== null && ($_SESSION['breakend'] < $time || $break_just_started)) {
   # Get the correct solution
   $res = $check->getResult();
 
@@ -275,23 +299,31 @@ if ($_SESSION['countleft'] == 0) {
   $html->addBodyContent('<a href="?startover=1">Spustit znovu</a>');
 } else {
   $html->addBodyContent($result_msg);
-  $html->addBodyContent("<h2>Zb&yacute;v&aacute; ". $_SESSION['countleft']. " p&rcaron;&iacute;klad&uring;</h2>");
-  if (($_SESSION['nofail'] == "no") || (!$spatne)) {
-    $html->addBodyContent('<h1>'. $priklad->getName(). '</h1>');
+  if ($_SESSION['breakend'] === 0) {
+    $html->addBodyContent("<h2>Zb&yacute;v&aacute; ". $_SESSION['countleft']. " p&rcaron;&iacute;klad&uring;</h2>");
+    if (($_SESSION['nofail'] == "no") || (!$spatne)) {
+      $html->addBodyContent('<h1>'. $priklad->getName(). '</h1>');
+    }
+    $html->addBodyContent('<form method="post">');
+    $html->addBodyContent($priklad->toHTML());
+    $html->addBodyContent($priklad->getResultHTMLForm());
+    $html->addBodyContent('<input type="submit" value="Hotovo">');
+    $html->addBodyContent('</form>');
+  } else {
+    $html->addBodyContent('<h1><a href="?">Dej si pauzu</a></h1>');
+    $html->addBodyContent('<p>Vrať se za <span class="time">'. sayTime($_SESSION['breakend']). '</span></p>');
+
   }
-  $html->addBodyContent('<form method="post">');
-  $html->addBodyContent($priklad->toHTML());
-  $html->addBodyContent($priklad->getResultHTMLForm());
-  $html->addBodyContent('<input type="submit" value="Hotovo">');
-  $html->addBodyContent('</form>');
 }
 
 if ((time() - $_SESSION['starttime'] > 2) || ($level->solved > 0)) {
   # Progress message with results, time and level name
   $html->addBodyContent('<p>Spr&aacute;vn&ecaron; <span class="correct">'. $level->correct. '</span> z <span class="solved">'. $level->solved. '</span> p&rcaron;&iacute;klad&uring;');
   switch ($_SESSION['difficulty']) {
-    case 3: $html->addBodyContent(' na&nbsp;t&ecaron;&zcaron;kou obt&iacute;&zcaron;nost '); break;
-    case 1: $html->addBodyContent(' na&nbsp;lehkou obt&iacute;&zcaron;nost '); break;
+    case 3: $html->addBodyContent(' na&nbsp;těžkou obtížnost '); break;
+    case 2: $html->addBodyContent(' na&nbsp;vyšší obtížnost '); break;
+    case 0: $html->addBodyContent(' na&nbsp;lehkou obtížnost '); break;
+    case -1: $html->addBodyContent(' -&nbsp;Pětiminutovka '); break;
   }
   if ($_SESSION['nofail'] == 'yes') {
     $html->addBodyContent(' s&nbsp;opravami');

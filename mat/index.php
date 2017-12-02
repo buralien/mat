@@ -236,22 +236,24 @@ if ($check !== null) {
     $level->correct += 1;
     $level->addWeight(get_class($check), -100);
     $result_msg = '<h2 class="success" id="temporary">Spr&aacute;vn&ecaron;!</h2>';
-    $html->setBodyAttributes(array('onload' => 'fade(document.getElementById("temporary"));'));
   } else {
     # Incorrect input
     if ($_SESSION['countleft'] < $level->max_formulas) { $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft'])); }
     $spatne=TRUE;
     $level->addWeight(get_class($check), 100);
     $result_msg = '<h2 class="fail" id="temporary">&Scaron;patn&ecaron;!</h2>';
-    $html->setBodyAttributes(array('onload' => 'fade(document.getElementById("temporary"));'));
     if ($_SESSION['nofail'] == "yes") {
       # Repeat the same formula, no solution is shown
       $priklad = $check;
     } else {
       # Show the correct solution
       $result_msg .= '<p class="correctresult">'. $check->toHTML(TRUE). '</p>';
+      $result_msg .= '<p>Tvoje odpověď: <span class="mistake">';
+      $result_msg .= implode (', ', $results);
+      $result_msg .= '</p>';
     }
   }
+  $html->setBodyAttributes(array('onload' => 'fade(document.getElementById("temporary"));'));
 }
 
 if ($priklad === null) {

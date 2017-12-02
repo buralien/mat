@@ -113,3 +113,9 @@ h2.fail {
   padding: 16px;
   display: block;
 }
+span.reference {
+  font-size: 50%;
+}
+span.mistake {
+  color: red;
+}

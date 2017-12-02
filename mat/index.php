@@ -93,7 +93,7 @@ if (!isset($_SESSION['starttime'])) {
   $_SESSION['starttime'] = time();
 }
 if (!isset($_SESSION['difficulty'])) {
-  $_SESSION['difficulty'] = 2;
+  $_SESSION['difficulty'] = 1;
 }
 if (!isset($_SESSION['countleft'])) {
   $_SESSION['countleft'] = null;
@@ -165,6 +165,9 @@ foreach ($_POST as $key => $val) {
     $clsid = $levels[intval($val)];
     $level = new $clsid();
   }
+}
+if($_SESSION['difficulty'] == -1) {
+  $_SESSION['nofail'] = 'no';
 }
 
 if (count($advanced_data) > 0) {

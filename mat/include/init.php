@@ -11,6 +11,7 @@ function start() {
   for (var i = 0; i < labels.length; i++) {
     labels[i].onclick = toggleBlock;
   }
+  document.getElementById('defaultdifficulty').checked=true;
 }
 function hideAll() {
   var elems = document.getElementsByClassName('elements');
@@ -38,7 +39,7 @@ $subj_form = array();
 foreach ($levels as $id => $clsid) {
   $l = new $clsid();
   $subj = implode(' ', $l->subjects);
-  $onclick = " onclick=\"document.getElementById('nofail').checked=";
+  $onclick = " onclick=\"if(document.getElementById('nofail').disabled==false)document.getElementById('nofail').checked=";
   if ($subj != 'Matematika') {
     $onclick .= "false;\"";
   } else {
@@ -68,9 +69,13 @@ $html->addBodyContent('</tr></tbody></table>');
 
 $html->addBodyContent('<h2 class="option">Volby</h2>');
 $html->addBodyContent('<h3 class="option">Obt&iacute;&zcaron;nost</h3>');
-$html->addBodyContent('<label><input type="radio" name="difficulty" value="1" />&nbsp;Lehk&aacute;</label>');
-$html->addBodyContent('<label><input type="radio" name="difficulty" value="2" checked="checked" />&nbsp;Norm&aacute;ln&iacute;</label>');
-$html->addBodyContent('<label><input type="radio" name="difficulty" value="3" />&nbsp;T&ecaron;&zcaron;k&aacute;</label>');
+$onclick = "onclick=\"document.getElementById('nofail').checked=false;document.getElementById('nofail').disabled=true;\"";
+$html->addBodyContent('<label '. $onclick. '><input type="radio" name="difficulty" value="-1" />&nbsp;Pětiminutovka</label>');
+$onclick = "onclick=\"document.getElementById('nofail').disabled=false;\"";
+$html->addBodyContent('<label '. $onclick. '><input type="radio" name="difficulty" value="0" checked="checked" />&nbsp;Lehká</label>');
+$html->addBodyContent('<label '. $onclick. '><input type="radio" id="defaultdifficulty" name="difficulty" value="1" checked="checked" />&nbsp;Normální</label>');
+$html->addBodyContent('<label '. $onclick. '><input type="radio" name="difficulty" value="2" />&nbsp;Vyšší</label>');
+$html->addBodyContent('<label '. $onclick. '><input type="radio" name="difficulty" value="3" />&nbsp;Těžká</label>');
 
 $html->addBodyContent('<br /><label><input type="number" name="countleft" value="'. POCATECNI_POCET. '" />&nbsp;p&rcaron;&iacute;klad&uring;</label>');
 $html->addBodyContent('<br /><label><input type="checkbox" name="nofail" id="nofail" value="yes" checked="checked" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');

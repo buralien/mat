@@ -16,7 +16,11 @@ abstract class Formula {
   }
   public function validateResult($input) {
     if (is_array($input)) {
-      return ( intval($input['result1']) == $this->getResult() );
+      if (isset($input['result1'])) {
+        return ( intval($input['result1']) == $this->getResult() );
+      } else {
+        return true;
+      }
     } else {
       return ( intval($input) == $this->getResult() );
     }

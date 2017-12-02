@@ -289,9 +289,10 @@ if ($priklad->voiceEnabled()) {
 }
 $_SESSION['level'] = encryptObject($level);
 $_SESSION['priklad'] = encryptObject($priklad);
+if (MAT_DEBUG) $html->addBodyContent('Final Session: <pre>'. print_r($_SESSION, true). '</pre>');
 session_write_close();
 
-if (MAT_DEBUG) $html->addBodyContent('<pre>'. print_r($priklad, TRUE). '</pre>');
+if (MAT_DEBUG) $html->addBodyContent('Priklad: <pre>'. print_r($priklad, TRUE). '</pre>');
 
 if ($_SESSION['countleft'] == 0) {
   # Successfully solved all formulas

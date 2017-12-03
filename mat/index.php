@@ -101,6 +101,9 @@ if (!isset($_SESSION['countleft'])) {
 if (!isset($_SESSION['nofail'])) {
   $_SESSION['nofail'] = "no";
 }
+if (!isset($_SESSION['nocount'])) {
+  $_SESSION['nocount'] = "no";
+}
 if (!isset($_SESSION['breakend'])) {
   $_SESSION['breakend'] = 0;
 }
@@ -159,6 +162,7 @@ foreach ($_POST as $key => $val) {
     }
   }
   if (($key == 'nofail') && ($val == 'yes')) $_SESSION['nofail'] = 'yes';
+  if (($key == 'nocount') && ($val == 'yes')) $_SESSION['nocount'] = 'yes';
   if (($key == 'countleft') && (is_numeric($val))) $_SESSION['countleft'] = intval($val);
   if (($key == 'difficulty') && (is_numeric($val))) $_SESSION['difficulty'] = intval($val);
   if (($key == 'init_level') && (is_numeric($val))) {
@@ -168,6 +172,7 @@ foreach ($_POST as $key => $val) {
 }
 if($_SESSION['difficulty'] == -1) {
   $_SESSION['nofail'] = 'no';
+  $_SESSION['nocount'] = 'yes';
 }
 
 if (count($advanced_data) > 0) {
@@ -304,7 +309,9 @@ if ($_SESSION['countleft'] == 0) {
 } else {
   $html->addBodyContent($result_msg);
   if ($_SESSION['breakend'] === 0) {
-    $html->addBodyContent("<h2>Zb&yacute;v&aacute; ". $_SESSION['countleft']. " p&rcaron;&iacute;klad&uring;</h2>");
+    if ($_SESSION['nocount'] == 'no') {
+      $html->addBodyContent("<h2>Zb&yacute;v&aacute; ". $_SESSION['countleft']. " p&rcaron;&iacute;klad&uring;</h2>");
+    }
     if (($_SESSION['nofail'] == "no") || (!$spatne)) {
       $html->addBodyContent('<h1>'. $priklad->getName(). '</h1>');
     }

@@ -58,15 +58,6 @@ foreach($subjects as $subject) {
   $html->addBodyContent('<div class="elements" id="elements'. $subj_num. '">'. implode('', $subj_form[$subject]). '</div>');
 }
 
-/*
-$html->addBodyContent('<table class="subjects"><thead><tr><th>'. implode('</th><th>', $subjects). '</th></tr></thead>');
-$html->addBodyContent('<tbody><tr>');
-foreach($subjects as $subject) {
-  $html->addBodyContent('<td>'. implode('', $subj_form[$subject]). '</td>');
-}
-$html->addBodyContent('</tr></tbody></table>');
-*/
-
 $html->addBodyContent('<h2 class="option">Volby</h2>');
 $html->addBodyContent('<h3 class="option">Obt&iacute;&zcaron;nost</h3>');
 $onclick = "onclick=\"document.getElementById('nofail').checked=false;document.getElementById('nofail').disabled=true;\"";
@@ -79,6 +70,7 @@ $html->addBodyContent('<label '. $onclick. '><input type="radio" name="difficult
 
 $html->addBodyContent('<br /><label><input type="number" name="countleft" value="'. POCATECNI_POCET. '" />&nbsp;p&rcaron;&iacute;klad&uring;</label>');
 $html->addBodyContent('<br /><label><input type="checkbox" name="nofail" id="nofail" value="yes" checked="checked" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');
+$html->addBodyContent('<br /><label><input type="checkbox" name="nocount" id="nocount" value="yes" />&nbsp;Nezobrazovat zbývající</label>');
 
 $html->addBodyContent('<br /><input type="submit" class="init" name="init" value="Za&ccaron;&iacute;t" />');
 $html->addBodyContent('</form>');

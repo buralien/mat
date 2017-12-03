@@ -107,6 +107,15 @@ if (!isset($_SESSION['nocount'])) {
 if (!isset($_SESSION['breakend'])) {
   $_SESSION['breakend'] = 0;
 }
+$githash = shell_exec('cd '. realpath(dirname(__FILE__). '/../'). ' && git log --pretty="%H" -n1 HEAD');
+if (!isset($_SESSION['gitcommit'])) {
+  $_SESSION['gitcommit'] = $githash;
+} elseif ($githash != $_SESSION['gitcommit']) {
+  session_destroy();
+  $_SESSION = array();
+  header('Location: ?', true, 303);
+  die();
+}
 
 $time = time();
 $break_just_started = false;
@@ -216,6 +225,7 @@ if ( $_SESSION['countleft'] === null ) {
   } else {
     include 'include/init.php';
   }
+  $_SESSION['gitcommit'] = $githash;
   include 'include/footer.php';
   $html->display();
   die();

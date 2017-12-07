@@ -70,7 +70,7 @@ class ReverseEnglishTextFormula extends EnglishTextFormula {
 
   public function validateResult($input) {
     if (is_array($input)) $input = implode(' ', $input);
-    $input = strtolower($input);
+    $input = preg_replace('/\s+/', ' ', strtolower(trim($input)));
     return ( $this->getResult() == $input );
   }
 } // class ReverseEnglishTextFormula

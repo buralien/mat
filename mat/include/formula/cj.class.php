@@ -115,10 +115,11 @@ class SouhlaskyUprostredSlov extends Formula {
       while (strpos($form, '_') !== false) {
         $form = $this->blankReplace($form, array_shift($input));
       }
+      $form = preg_replace('/\s+/', ' ', strtolower(trim($form)));
       if (MAT_DEBUG) print("Checking $form in ". $this->dict);
       if ($handle = fopen($this->dict, 'r')) {
         while($line = stream_get_line($handle, 256, "\n")) {
-          if (trim($line) == trim($form)) {
+          if (strtolower(trim($line)) == $form) {
             $ret = true;
             break;
           }

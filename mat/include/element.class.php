@@ -191,14 +191,14 @@ class EnglishTextElement extends FormulaElement {
   }
 
   public function toStr() {
-    return $this->sayNumber($this->element);
+    return static::sayNumber($this->element);
   }
 
   public function toHTML() {
-    return '<span class="primitive">'. $this->sayNumber($this->element). '</span>';
+    return '<span class="primitive">'. static::sayNumber($this->element). '</span>';
   }
 
-  private function sayNumber($number) {
+  public static function sayNumber($number) {
     switch ($number) {
       case 0: return 'zero';
       case 1: return 'one';

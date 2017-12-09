@@ -157,7 +157,7 @@ class VyjmenovanaSlovaDiktat extends VyjmenovanaSlova {
 
   public function voiceEnabled() { return true; }
 
-  public function toHTML($result = FALSE) {
+  public function toHTML($result = FALSE, $cls = '') {
     if ($result) {
       return parent::toHTML(true);
     } else {

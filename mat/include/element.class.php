@@ -223,17 +223,17 @@ class EnglishTextElement extends FormulaElement {
       default:
         $text = array();
         $m = floor($number / 1000000);
-        if ($m > 0) $text[] = $this->sayNumber($m). ' million';
+        if ($m > 0) $text[] = static::sayNumber($m). ' million';
         $number %= 1000000;
         $t = floor($number / 1000);
-        if ($t > 0) $text[] = $this->sayNumber($t). ' thousand';
+        if ($t > 0) $text[] = static::sayNumber($t). ' thousand';
         $number %= 1000;
         $h = floor($number / 100);
-        if ($h > 0) $text[] = $this->sayNumber($h). ' hundred';
+        if ($h > 0) $text[] = static::sayNumber($h). ' hundred';
         $number %= 100;
         if ($number < 20) {
           if ($number >= 0) {
-            $text[] = $this->sayNumber($number);
+            $text[] = static::sayNumber($number);
           }
         } elseif ($number > 0) {
           $d = floor($number / 10);
@@ -248,7 +248,7 @@ class EnglishTextElement extends FormulaElement {
             case 9: $text[] = 'ninety'; break;
           }
           $number %= 10;
-          if ($number > 0) $text[] = $this->sayNumber($number);
+          if ($number > 0) $text[] = static::sayNumber($number);
         }
         return implode(' ', $text);
     }

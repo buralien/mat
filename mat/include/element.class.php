@@ -13,7 +13,6 @@ abstract class FormulaElement {
   public function __toString() {
     return $this->toStr();
   }
-
 }
 
 class PrimitiveElement extends FormulaElement {
@@ -48,7 +47,7 @@ class RandomPrimitiveElement extends PrimitiveElement {
   }
 }
 
-class OperatorElement extends FormulaElement {
+class OperatorElement {
   protected $operator;
 
   function __construct($op = OP_PLUS) {
@@ -87,6 +86,10 @@ class OperatorElement extends FormulaElement {
       default:
         return $this->getMath();
     }
+  }
+
+  public function __toString() {
+    return $this->toStr();
   }
 
   public function toHTML() {

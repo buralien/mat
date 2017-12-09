@@ -232,7 +232,7 @@ class EnglishTextElement extends FormulaElement {
         if ($h > 0) $text[] = $this->sayNumber($h). ' hundred';
         $number %= 100;
         if ($number < 20) {
-          if ($number > 0) {
+          if ($number >= 0) {
             $text[] = $this->sayNumber($number);
           }
         } elseif ($number > 0) {

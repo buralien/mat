@@ -64,8 +64,8 @@ class SouhlaskyUprostredSlov extends Formula {
     if ($result) {
       $text .= $this->element->toHTML();
       $text .= ' <span class="reference">';
-      $text .= '<a href="http://ssjc.ujc.cas.cz/search.php?hledej=Hledat&sti=EMPTY&where=hesla&hsubstr=no&heslo='. urlencode($this->element->toStr()). '" target="_blank">SSČ</a>, ';
-      $text .= '<a href="http://prirucka.ujc.cas.cz/?slovo='. urlencode($this->element->toStr()). '" target="_blank">IJP</a></span>';
+      $text .= '<a href="http://ssjc.ujc.cas.cz/search.php?hledej=Hledat&sti=EMPTY&where=hesla&hsubstr=no&heslo='. urlencode($this->element->toStr()). '" target="_blank"><abbr title="Slovník spisovné češtiny">SSČ</abbr></a>, ';
+      $text .= '<a href="http://prirucka.ujc.cas.cz/?slovo='. urlencode($this->element->toStr()). '" target="_blank"><abbr title="Internetová jazyková příručka">IJP</abbr></a></span>';
     } else {
       $form = $this->getBlank();
       $rescount = 1;
@@ -292,8 +292,8 @@ class SlovniDruhy extends Formula {
     if ($result) {
       $text .= $this->sl_druhy[$this->druh];
       $text .= ' <span class="reference">';
-      $text .= '<a href="http://ssjc.ujc.cas.cz/search.php?hledej=Hledat&sti=EMPTY&where=hesla&hsubstr=no&heslo='. urlencode($this->element->toStr()). '" target="_blank">SSČ</a>, ';
-      $text .= '<a href="http://prirucka.ujc.cas.cz/?slovo='. urlencode($this->element->toStr()). '" target="_blank">IJP</a></span>';
+      $text .= '<a href="http://ssjc.ujc.cas.cz/search.php?hledej=Hledat&sti=EMPTY&where=hesla&hsubstr=no&heslo='. urlencode($this->element->toStr()). '" target="_blank"><abbr title="Slovník spisovné češtiny">SSČ</abbr></a>, ';
+      $text .= '<a href="http://prirucka.ujc.cas.cz/?slovo='. urlencode($this->element->toStr()). '" target="_blank"><abbr title="Internetová jazyková příručka">IJP</abbr></a></span>';
     } else {
       $text .= '<label class="select2"><select name="result1" class="select2"><option value="*"> </option>';
       foreach($this->sl_druhy as $number => $name) {

@@ -2,6 +2,8 @@
 
 class EnglishTextFormula extends Formula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky';
+  protected $max;
+  protected $min;
   public static $subject = 'Angli&ccaron;tina';
   public static $advanced = 'do {number}';
   protected $element;
@@ -10,7 +12,19 @@ class EnglishTextFormula extends Formula {
     if ($max === null) $max = 100;
     if (($min === null)||($min < 0)) $min = 0;
     if ($max < $min) $max = $min;
+    $this->max = $max;
+    $this->min = $min;
     $this->element = new EnglishTextElement($this->getNumber($max, $min, array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+  }
+
+  /**
+  * @return string
+  */
+  public function getName() {
+    $text[] = static::$name;
+    if ($this->min >= 0) $text[] = 'od '. $this->min;
+    $text[] = 'do '. $this->max;
+    return implode(' ', $text);
   }
 
   public function getResult() {

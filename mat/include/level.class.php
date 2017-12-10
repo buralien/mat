@@ -36,7 +36,7 @@ class FormulaWeight {
   }
 }
 
-abstract class GenericLevel {
+abstract class GenericLevel implements Countable {
   protected $formulas;
   public $name;
   public $max_formulas = 10;
@@ -133,7 +133,7 @@ abstract class GenericLevel {
   /**
   * @return integer
   */
-  public function countFormulas() {
+  public function count() {
     return count($this->formulas);
   }
 }

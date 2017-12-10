@@ -30,11 +30,13 @@ class SimpleFormula extends Formula {
     return $text;
   }
 
+  /**
+  * @ignore
+  */
   public static function fromStr($frml) {
     $matches = array();
     $res = preg_match('(\d+)(\w)(\d+)', $frml, $matches);
-    $matches[1] = strtr($matches[1], "x:", "*/");
-    $matches[1] = strtr($matches[1], "+-/*", "1248");
+    $matches[1] = strtr($matches[1], "+-x:", "1248");
     return $matches;
   }
 
@@ -49,20 +51,15 @@ class SimpleFormula extends Formula {
     $html .= '</span>';
     return $html;
   }
-
 } // class SimpleFormula
 
 class RandomSimpleFormula extends SimpleFormula {
-  public static $name = 'Aritmetika';
-  public static $subject = 'Matematika';
+  protected $max;
   public static $advanced = 'do {number} (operace {opmask})';
   function __construct ($max = null, $opmask = null) {
-    if ($max === null) {
-      $max = floor(mt_getrandmax() / 4);
-    } else {
-      self::$name .= ' do '. $max;
-    }
-    if ($opmask == null) $opmask = 0;
+    if ($max === null) $this->max = floor(mt_getrandmax() / 4);
+    if ($opmask === null) $opmask = 0;
+    $this->max = $max;
     do {
       $this->operator = new RandomOperatorElement($opmask);
       if ($this->operator->getMath() == '/') {
@@ -79,6 +76,10 @@ class RandomSimpleFormula extends SimpleFormula {
       }
       $res = $this->getResult();
     } while (($res > $max) || ($res < 0) || ($res != floor($res)));
+  }
+
+  public function getName() {
+    return static::$name. ' do '. $this->max;
   }
 } // class RandomSimpleFormula
 
@@ -129,15 +130,14 @@ class TripleFormula extends Formula {
   }
 } // class TripleFormula
 
-class MalaNasobilka extends SimpleFormula {
+class MalaNasobilka extends RandomSimpleFormula {
   public static $name = 'Mal&aacute; n&aacute;sobilka';
   public static $advanced = 'do {number} (&rcaron;&aacute;d {number})';
+
   function __construct ($max = null, $power = null) {
-    if ($max == null) $max = 10;
-    if ($power == null) $power = 1;
-    if ($max != 10) {
-      self::$name .= ' do '. $max;
-    }
+    if ($max === null || $max > 10) $max = 10;
+    if ($power === null || $power < 1) $power = 1;
+    $this->max = $max;
     $this->operator = new OperatorElement(OP_KRAT);
     $this->element2 = new PrimitiveElement($this->getNumber($max, 0, array(0, 1, 10)));
     $a = $this->getNumber(10, 1, array(0, 1, 10));
@@ -148,14 +148,19 @@ class MalaNasobilka extends SimpleFormula {
       $this->element1 = new PrimitiveElement($a);
     } while ($this->getResult() > (pow(10, $power) * $max));
   }
+
+  public function getName() {
+    return static::$name. (($this->max != 10) ? ' do '. $this->max : '');
+  }
 } // class MalaNasobilka
 
-class StredniNasobilka extends SimpleFormula {
+class StredniNasobilka extends RandomSimpleFormula {
   public static $name = 'N&aacute;sobilka';
   public static $advanced = 'do {number}';
+
   function __construct ($max = null) {
-    if ($max == null) $max = 100;
-    self::$name .= ' do '. $max;
+    if ($max === null || $max < 11) $max = 100;
+    $this->max = $max;
     do {
       $this->element1 = new PrimitiveElement($this->getNumber($max, 11));
     } while ($this->element1->getValue() % 10 == 0);
@@ -164,29 +169,38 @@ class StredniNasobilka extends SimpleFormula {
   }
 }
 
-class VelkaNasobilka extends SimpleFormula {
+class VelkaNasobilka extends StredniNasobilka {
   public static $name = 'Velk&aacute; n&aacute;sobilka';
-  public static $advanced = 'do {number}';
+
   function __construct ($max = null) {
-    if ($max == null) $max = 100;
-    $this->element1 = new PrimitiveElement($this->getNumber($max, 11));
-    $this->element2 = new PrimitiveElement($this->getNumber($max, 11));
+    if ($max === null || $max < 11) $max = 100;
+    $this->max = $max;
+    do {
+      $this->element1 = new PrimitiveElement($this->getNumber($max, 11));
+    } while ($this->element1->getValue() % 10 == 0);
+    do {
+      $this->element2 = new PrimitiveElement($this->getNumber($max, 11));
+    } while ($this->element2->getValue() % 10 == 0);
     $this->operator = new OperatorElement(OP_KRAT);
   }
 }
 
-class DeleniSeZbytkem extends SimpleFormula {
+class DeleniSeZbytkem extends RandomSimpleFormula {
   public static $name = 'D&ecaron;len&iacute; se zbytkem';
   public static $advanced = 'do {number}';
+
   function __construct ($max = null, $el1 = null, $el2 = null) {
-    if ($max == null) $max = floor(mt_getrandmax() / 4);
-    self::$name .= ' do '. $max;
+    if ($max === null) $max = floor(mt_getrandmax() / 4);
+    if ($max < 2) $max = 100;
+
     $this->operator = new OperatorElement(OP_DELENO);
+
     if ($el2 === null) {
       $this->element2 = new PrimitiveElement($this->getNumber(10, 2, array(10), array(0, 1)));
     } else {
       $this->element2 = new PrimitiveElement($el2);
     }
+
     if ($el1 === null) {
       do {
         $this->element1 = new PrimitiveElement($this->getNumber($max, 2, array(10), array(0, 1)));
@@ -237,14 +251,13 @@ class DeleniSeZbytkem extends SimpleFormula {
   }
 } // class DeleniSeZbytkem
 
-class VelkeScitani extends SimpleFormula {
+class VelkeScitani extends RandomSimpleFormula {
   public static $name = 'S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute;';
-  public static $advanced = 'do {number}';
+  public static $advanced = 'ignore';
 
   function __construct($max = null) {
-    if ($max == null) $max = 1000;
-
-    self::$name .= ' do '. $max;
+    if ($max === null) $max = 1000;
+    $this->max = $max;
     do {
       $this->element1 = new RandomPrimitiveElement($max, 11);
       $this->element2 = new RandomPrimitiveElement($max, 11);
@@ -276,14 +289,22 @@ class DvaSoucty extends TripleFormula {
       $res2 = $this->getResult();
     } while (($res2 > $max) || ($res2 < 0));
   }
+
+  /**
+  * @return string
+  */
+  public function getName() {
+    return static::$name. ' do '. $this->max;
+  }
 }
 
 class RomanNumerals extends Formula {
   public static $name = '&Rcaron;&iacute;msk&eacute; &ccaron;&iacute;slice';
   public static $subject = 'Matematika';
   public static $advanced = 'do {number}';
-  private $element;
-  private $lookup = array(
+  protected $element;
+  protected $max;
+  protected $lookup = array(
     'M' => 1000,
     'CM' => 900,
     'D' => 500,
@@ -299,8 +320,13 @@ class RomanNumerals extends Formula {
     'I' => 1);
 
   function __construct($max = null) {
-    if ($max == null) $max = 2000;
+    if ($max === null) $max = 2000;
+    $this->max = $max;
     $this->element = new RandomPrimitiveElement($max);
+  }
+
+  public function getName() {
+    return static::$name. ' do '. $this->max;
   }
 
   private function toRoman() {
@@ -418,7 +444,6 @@ class MultiFormula extends Formula {
     $text .= '</span>';
     return $text;
   }
-
 }
 
 class RandomSimpleMultiFormula extends MultiFormula {
@@ -431,6 +456,7 @@ class RandomSimpleMultiFormula extends MultiFormula {
     if ($min_num == null) $min_num = 2;
     if ($min < 2) $min = 2;
     if ($min_num > $max_num) $min_num = $max_num;
+
     $num = mt_rand($min_num, $max_num);
     $this->elements[] = new RandomPrimitiveElement($max, $min);
     $this->operators = array();
@@ -449,21 +475,35 @@ class RandomSimpleMultiFormula extends MultiFormula {
       //echo "NEXT ". $this->toStr(TRUE). "\n";
     }
   }
+
+  /**
+  * @return string
+  */
+  public function getName() {
+    $text[] = static::$name;
+    if ($this->min > 2) $text[] = 'od '. $this->min;
+    if ($this->max < floor(mt_getrandmax() / 4)) $text[] = 'do '. $this->max;
+    if ($this->min_num == $this->max_num) $text[] = '('. $this->max_num;
+      else $text[] = '('. $this->min_num. ' - '. $this->max_num;
+    if ($this->max_num >= 5) $text[] = 'čísel)';
+      else $text[] = 'čísla)';
+    return implode(' ', $text);
+  }
 }
 
-class SimpleBracketFormula extends SimpleFormula {
+class SimpleBracketFormula extends RandomSimpleFormula {
   public static $name = 'Aritmetika se z&aacute;vorkou';
   public static $advanced = 'do {number}';
   function __construct($max = null) {
     if ($max == null) {
       $max = floor(mt_getrandmax() / 4);
     }
-    self::$name .= ' do '. $max;
+    $this->max = $max;
     do {
       do {
         $this->element1 = new RandomCombinedElement($max, 1, OP_KRAT + OP_DELENO);
         $res = $this->element1->getValue();
-      } while (($res < 0) || ($res > $max) || ($res < 2));
+      } while (($res > $max) || ($res < 2));
       $el2 = $this->getNumber(10, 2, array(1, 10), array(0));
       $this->element2 = new PrimitiveElement($el2);
       $this->operator = new RandomOperatorElement(OP_PLUS + OP_MINUS);

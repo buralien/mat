@@ -315,6 +315,10 @@ if (MAT_DEBUG) $html->addBodyContent('Priklad: <pre>'. print_r($priklad, TRUE). 
 if ($_SESSION['countleft'] == 0) {
   # Successfully solved all formulas
   $html->addBodyContent('<h2 class="success">Hotovo!</h2>');
+  if ($level->countFormulas() > 1) {
+    $html->addBodyContent('<p>Nejlepší: '. $level->bestFormula(). '</p>');
+    $html->addBodyContent('<p>Nejhorší: '. $level->worstFormula(). '</p>');
+  }
   $html->addBodyContent('<a href="?startover=1">Spustit znovu</a>');
 } else {
   $html->addBodyContent($result_msg);

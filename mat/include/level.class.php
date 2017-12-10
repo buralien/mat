@@ -99,6 +99,43 @@ abstract class GenericLevel {
     $this->subjects = array_keys($subj);
   }
 
+  public function worstFormula() {
+    $worst = 0;
+    foreach($this->formulas as $formula) {
+      if($formula->getWeight() > $worst) {
+        $worst = $formula->getWeight();
+      }
+    }
+    $ret = array();
+    foreach($this->formulas as $formula) {
+      if($formula->getWeight() == $worst) {
+        $ret[] = $formula->getDescription();
+      }
+    }
+    return implode(', ', $ret);
+  }
+
+  public function bestFormula() {
+    $best = mt_getrandmax();
+    foreach($this->formulas as $formula) {
+      if($formula->getWeight() < $best) {
+        $best = $formula->getWeight();
+      }
+    }
+    foreach($this->formulas as $formula) {
+      if($formula->getWeight() == $best) {
+        $ret[] = $formula->getDescription();
+      }
+    }
+    return implode(', ', $ret);
+  }
+
+  /**
+  * @return integer
+  */
+  public function countFormulas() {
+    return count($this->formulas);
+  }
 }
 
 class CustomLevel extends GenericLevel {

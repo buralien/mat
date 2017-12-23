@@ -209,6 +209,7 @@ if (count($advanced_data) > 0) {
       }
     }
   }
+  if(count($custom_level) < 1) $custom_level->addFormula('MalaNasobilka');
   if (MAT_DEBUG) $html->addBodyContent('Advanced: <pre>'. print_r($custom_level, true). '</pre>');
   $level = $custom_level;
 }

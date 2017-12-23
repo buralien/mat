@@ -254,45 +254,51 @@ $html->addScriptDeclaration($js);
 $spatne = FALSE;
 $priklad = null;
 $result_msg = '';
-//if (($check !== null) && (!$break_just_started) && ($_SESSION['breakend'] > 0)) {
 if ($check !== null && ($_SESSION['breakend'] < $time || $break_just_started)) {
-  # Get the correct solution
-  $res = $check->getResult();
-
-  # Log the stats
-  $stats = new StatsManager();
-  $stats->addRecord(session_id(), $check, $results);
-  $stats->close();
-
-  if (!is_array($res)) {
-    $res = array($res);
-  }
-  if (($check instanceof DeleniSeZbytkem) && (!isset($results['result2']))) {
-    # Empty input is considered a zero
-    $results['result2'] = 0;
-  }
-
-  if ($check->validateResult($results)) {
-    # Correct input
-    $_SESSION['countleft']--;
-    $level->correct += 1;
-    $level->addWeight(get_class($check), -100);
-    $result_msg = '<h2 class="success" id="temporary">Spr&aacute;vn&ecaron;!</h2>';
-  } else {
-    # Incorrect input
-    if ($_SESSION['countleft'] < $level->max_formulas) { $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft'])); }
-    $spatne=TRUE;
+  if (implode("", $results) == "") {
+    # Empty input submitted
+    $level->solved -= 1;
     $level->addWeight(get_class($check), 100);
-    $result_msg = '<h2 class="fail" id="temporary">&Scaron;patn&ecaron;!</h2>';
-    if ($_SESSION['nofail'] == "yes") {
-      # Repeat the same formula, no solution is shown
-      $priklad = $check;
+    $priklad = $check;
+  } else {
+    # Get the correct solution
+    $res = $check->getResult();
+
+    # Log the stats
+    $stats = new StatsManager();
+    $stats->addRecord(session_id(), $check, $results);
+    $stats->close();
+
+    if (!is_array($res)) {
+      $res = array($res);
+    }
+    if (($check instanceof DeleniSeZbytkem) && (!isset($results['result2']))) {
+      # Empty input is considered a zero
+      $results['result2'] = 0;
+    }
+
+    if ($check->validateResult($results)) {
+      # Correct input
+      $_SESSION['countleft']--;
+      $level->correct += 1;
+      $level->addWeight(get_class($check), -100);
+      $result_msg = '<h2 class="success" id="temporary">Spr&aacute;vn&ecaron;!</h2>';
     } else {
-      # Show the correct solution
-      $result_msg .= '<p class="correctresult">'. $check->toHTML(TRUE). '</p>';
-      $result_msg .= '<p>Tvoje odpověď: <span class="mistake">';
-      $result_msg .= implode (', ', $results);
-      $result_msg .= '</p>';
+      # Incorrect input
+      if ($_SESSION['countleft'] < $level->max_formulas) { $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft'])); }
+      $spatne=TRUE;
+      $level->addWeight(get_class($check), 100);
+      $result_msg = '<h2 class="fail" id="temporary">&Scaron;patn&ecaron;!</h2>';
+      if ($_SESSION['nofail'] == "yes") {
+        # Repeat the same formula, no solution is shown
+        $priklad = $check;
+      } else {
+        # Show the correct solution
+        $result_msg .= '<p class="correctresult">'. $check->toHTML(TRUE). '</p>';
+        $result_msg .= '<p>Tvoje odpověď: <span class="mistake">';
+        $result_msg .= implode (', ', $results);
+        $result_msg .= '</p>';
+      }
     }
   }
   $html->setBodyAttributes(array('onload' => 'fade(document.getElementById("temporary"));'));

@@ -8,7 +8,7 @@ class FormulaSolver {
   * @param FormulaElement $element1
   * @param FormulaElement $element2
   * @param OperatorElement $operator
-  * @return integer
+  * @return integer The solution
   */
   public static function solve(FormulaElement $element1, FormulaElement $element2, OperatorElement $operator) {
     $expr = $element1->getValue() . $operator->getMath() . $element2->getValue();
@@ -16,9 +16,9 @@ class FormulaSolver {
   }
 
   /**
-  * @param array $elements
-  * @param array $operators
-  * @return integer
+  * @param array $elements Ordered list of elements
+  * @param array $operators Ordered list of operators (one less then the elements)
+  * @return integer The solution
   */
   public static function multisolve($elements, $operators) {
     if(count($elements) < 1) return null;
@@ -32,6 +32,9 @@ class FormulaSolver {
   }
 }
 
+/**
+* Basic class for simple formulas with two numbers and one operator
+*/
 class SimpleFormula extends Formula {
   public static $name = 'Aritmetika';
   public static $subject = 'Matematika';
@@ -40,6 +43,12 @@ class SimpleFormula extends Formula {
   protected $operator;
   protected $element2;
 
+  /**
+  * @param integer $el1 Element 1
+  * @param integer $op Operator. Use the OP_ constants to pass value
+  * @param integer $el2 Element 2
+  * @return void
+  */
   function __construct ($el1, $op, $el2) {
     $this->element1 = new PrimitiveElement($el1);
     $this->element2 = new PrimitiveElement($el2);
@@ -49,6 +58,9 @@ class SimpleFormula extends Formula {
     }
   }
 
+  /**
+  * @return integer The solution
+  */
   public function getResult () {
     return FormulaSolver::solve($this->element1, $this->element2, $this->operator);
   }
@@ -84,9 +96,18 @@ class SimpleFormula extends Formula {
   }
 } // class SimpleFormula
 
+/**
+* Randomly generated SimpleFormula object
+*/
 class RandomSimpleFormula extends SimpleFormula {
   protected $max;
   public static $advanced = 'do {number} (operace {opmask})';
+
+  /**
+  * @param integer $max Maximum number. Default floor(mt_getrandmax() / 4)
+  * @param integer $opmask Bitmask of operators to exclude
+  * @return void
+  */
   function __construct ($max = null, $opmask = null) {
     if ($max === null) $this->max = floor(mt_getrandmax() / 4);
     if ($opmask === null) $opmask = 0;
@@ -114,6 +135,10 @@ class RandomSimpleFormula extends SimpleFormula {
   }
 } // class RandomSimpleFormula
 
+/**
+* Basic formula consisting of three integers and two operators.
+* This is most likely redundant with MultiFormula
+*/
 class TripleFormula extends Formula {
   public static $name = "Aritmetika (3 &ccaron;&iacute;sla)";
   public static $subject = 'Matematika';
@@ -124,6 +149,14 @@ class TripleFormula extends Formula {
   protected $operator2;
   protected $element3;
 
+  /**
+  * @param integer $el1 Element 1
+  * @param integer $op1 Operator 1. Use the OP_ constants to pass value
+  * @param integer $el2 Element 2
+  * @param integer $op2 Operator 2. Use the OP_ constants to pass value
+  * @param integer $el3 Element 3
+  * @return void
+  */
   function __construct ($el1, $op1, $el2, $op2, $el3) {
     $this->element1 = new PrimitiveElement($el1);
     $this->operator1 = new OperatorElement($op1);
@@ -161,10 +194,18 @@ class TripleFormula extends Formula {
   }
 } // class TripleFormula
 
+/**
+* Special case of a RandomSimpleFormula - multiplication of single digit numbers
+*/
 class MalaNasobilka extends RandomSimpleFormula {
   public static $name = 'Mal&aacute; n&aacute;sobilka';
   public static $advanced = 'do {number} (&rcaron;&aacute;d {number})';
 
+  /**
+  * @param integer $max Maximum value of each element (not the result!) Cannot exceed 10. Default 10
+  * @param integer $power Power of 10 to which one of the elements can be increased
+  * @return void
+  */
   function __construct ($max = null, $power = null) {
     if ($max === null || $max > 10) $max = 10;
     if ($power === null || $power < 1) $power = 1;
@@ -185,10 +226,17 @@ class MalaNasobilka extends RandomSimpleFormula {
   }
 } // class MalaNasobilka
 
+/**
+* Simple multiplication formula, where the second element is always a single digit number
+*/
 class StredniNasobilka extends RandomSimpleFormula {
   public static $name = 'N&aacute;sobilka';
   public static $advanced = 'do {number}';
 
+  /**
+  * @param integer $max Maximum value of the first element (not the result!) Default 100
+  * @return void
+  */
   function __construct ($max = null) {
     if ($max === null || $max < 11) $max = 100;
     $this->max = $max;
@@ -200,9 +248,16 @@ class StredniNasobilka extends RandomSimpleFormula {
   }
 }
 
+/**
+* Multiplication of two elements >11
+*/
 class VelkaNasobilka extends StredniNasobilka {
   public static $name = 'Velk&aacute; n&aacute;sobilka';
 
+  /**
+  * @param integer $max Maximum value of each element (not the result!) Default 100
+  * @return void
+  */
   function __construct ($max = null) {
     if ($max === null || $max < 11) $max = 100;
     $this->max = $max;
@@ -216,10 +271,19 @@ class VelkaNasobilka extends StredniNasobilka {
   }
 }
 
+/**
+* Division with remainder
+*/
 class DeleniSeZbytkem extends RandomSimpleFormula {
   public static $name = 'D&ecaron;len&iacute; se zbytkem';
   public static $advanced = 'do {number}';
 
+  /**
+  * @param integer $max Maximum value of the dividend (not the result!) Default floor(mt_getrandmax() / 4)
+  * @param integer $el1 Dividend. By default a random one is generated between 2 and $max
+  * @param integer $el2 Divisor. By default a random one is generated between 2 and 10
+  * @return void
+  */
   function __construct ($max = null, $el1 = null, $el2 = null) {
     if ($max === null) $max = floor(mt_getrandmax() / 4);
     if ($max < 2) $max = 100;
@@ -282,10 +346,17 @@ class DeleniSeZbytkem extends RandomSimpleFormula {
   }
 } // class DeleniSeZbytkem
 
+/**
+* Addition and subtraction
+*/
 class VelkeScitani extends RandomSimpleFormula {
   public static $name = 'S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute;';
   public static $advanced = 'ignore';
 
+  /**
+  * @param integer $max Maximum value of each element and the result. Default 1000
+  * @return void
+  */
   function __construct($max = null) {
     if ($max === null) $max = 1000;
     $this->max = $max;
@@ -298,11 +369,18 @@ class VelkeScitani extends RandomSimpleFormula {
   }
 }
 
+/**
+* Two addition/subtraction formulas combined
+*/
 class DvaSoucty extends TripleFormula {
   public static $name = "S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute; (3 &ccaron;&iacute;sla)";
   protected $max;
   public static $advanced = 'do {number}';
 
+  /**
+  * @param integer $max Maximum value of each element and the result. Default 1000
+  * @return void
+  */
   function __construct ($max = null) {
     if ($max === null) $max = 1000;
     $this->max = $max;
@@ -328,12 +406,19 @@ class DvaSoucty extends TripleFormula {
   }
 }
 
+/**
+* Converting to and from Roman numerals
+*/
 class RomanNumerals extends Formula {
   public static $name = '&Rcaron;&iacute;msk&eacute; &ccaron;&iacute;slice';
   public static $subject = 'Matematika';
   public static $advanced = 'do {number}';
   protected $element;
   protected $max;
+
+  /**
+  * @var array Roman numerals lookup table
+  */
   protected $lookup = array(
     'M' => 1000,
     'CM' => 900,
@@ -349,6 +434,10 @@ class RomanNumerals extends Formula {
     'IV' => 4,
     'I' => 1);
 
+  /**
+  * @param integer $max Default 2000
+  * @return void
+  */
   function __construct($max = null) {
     if ($max === null) $max = 2000;
     $this->max = $max;
@@ -359,6 +448,9 @@ class RomanNumerals extends Formula {
     return static::$name. ' do '. $this->max;
   }
 
+  /**
+  * @return string Roman numeral representation
+  */
   private function toRoman() {
     $number = intval($this->element->getValue());
     $result = '';
@@ -371,6 +463,10 @@ class RomanNumerals extends Formula {
     return $result;
   }
 
+  /**
+  * @param string $number Number represented in Romal numerals
+  * @return integer
+  */
   private static function romanToInt($number) {
     $result = 0;
     $valid = TRUE;
@@ -409,6 +505,10 @@ class RomanNumerals extends Formula {
   }
 }
 
+/**
+* Generic class representing a formula with any number of elements
+* and the respective operators.
+*/
 class MultiFormula extends Formula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
   public static $subject = 'Matematika';
@@ -416,6 +516,14 @@ class MultiFormula extends Formula {
   protected $elements;
   protected $operators;
 
+  /**
+  * This function works with variable number of parameters.
+  * You can pass two arrays - first one for elements and second one for operators
+  * You can also pass any number of FormulaElement and OperatorElement objects
+  * in the correct order (alternating elements and operators)
+  *
+  * @return void
+  */
   function __construct() {
     #TODO: must define case with too few params
     $params = func_get_args();
@@ -481,14 +589,32 @@ class MultiFormula extends Formula {
   }
 }
 
+/**
+* Randomly generated formula with multiple elements and operators
+*/
 class RandomSimpleMultiFormula extends MultiFormula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
   public static $advanced = 'do {number} od {number} ({number}-{number} &ccaron;&iacute;sel)';
   protected $max;
   protected $min;
+
+  /**
+  * @var integer Maximum number of elements in the formula
+  */
   protected $max_num;
+
+  /**
+  * @var integer Minimum number of elements in the formula
+  */
   protected $min_num;
 
+  /**
+  * @param integer $max
+  * @param integer $min
+  * @param integer $min_num Minimum number of elements to generate (Default 2)
+  * @param integer $max_num Maximum number of elements to generate (Default 4)
+  * @return void
+  */
   function __construct($max = null, $min = null, $min_num = null, $max_num = null ) {
     if ($max == null) $max = floor(mt_getrandmax() / 4);
     if ($min == null) $min = 2;
@@ -535,9 +661,17 @@ class RandomSimpleMultiFormula extends MultiFormula {
   }
 }
 
+/**
+* Simple formula that uses brackets
+*/
 class SimpleBracketFormula extends RandomSimpleFormula {
   public static $name = 'Aritmetika se z&aacute;vorkou';
   public static $advanced = 'do {number}';
+
+  /**
+  * @param integer $max Default floor(mt_getrandmax() / 4)
+  * @return void
+  */
   function __construct($max = null) {
     if ($max == null) {
       $max = floor(mt_getrandmax() / 4);
@@ -556,14 +690,36 @@ class SimpleBracketFormula extends RandomSimpleFormula {
   }
 }
 
+/**
+* Conversion of SI unit prefixes
+*/
 class PrevodJednotek extends Formula {
   public static $name = 'P&rcaron;evod jednotek';
   public static $subject = 'Matematika';
   public static $advanced = 'ignore';
+
+  /**
+  * @var PhysicsElement
+  */
   private $element;
+
+  /**
+  * @var string
+  */
   private $sourceprefix;
+
+  /**
+  * @var string
+  */
   private $targetprefix;
 
+  /**
+  * @param string $maxprefix Default 'T'
+  * @param string $minprefix Default 'n'
+  * @param integer $maxvalue Default 100
+  * @param array $units List of allowed SI units. Default is ('m', 'g', 's', 'A', 'K', 'mol', 'cd')
+  * @return void
+  */
   function __construct($maxprefix = null, $minprefix = null, $maxvalue = null, $units = null) {
     if($maxvalue === null) $maxvalue = 100;
 

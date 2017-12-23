@@ -9,6 +9,10 @@ class SouhlaskyUprostredSlov extends Formula {
   protected $dict;
   protected $toreplace;
 
+  /**
+  * @param string $letter
+  * @return void
+  */
   function __construct($letter = null) {
     switch ($letter) {
       case 'b':
@@ -52,13 +56,30 @@ class SouhlaskyUprostredSlov extends Formula {
     }
     $this->element = new RandomWordElement($this->dict);
   }
+
+  /**
+  * Returns a string which has all the tested letters replaced with character _
+  * @return string
+  */
   protected function getBlank() {
     return str_replace($this->toreplace, '_', $this->element);
   }
+
+  /**
+  * Returns a string that has the first  _ character in $haystack replaced with $repl
+  * @param string $haystack
+  * @param string $repl
+  * @return string
+  */
   protected function blankReplace($haystack, $repl) {
     return implode($repl, explode('_', $haystack, 2));
   }
 
+  /**
+  * @param boolean $result Whether to include the result in the returned string
+  * @param string $cls HTML Label class attribute (default 'select')
+  * @return string
+  */
   public function toHTML($result = FALSE, $cls = 'select') {
     $text = '<span class="formula">';
     if ($result) {
@@ -104,6 +125,7 @@ class SouhlaskyUprostredSlov extends Formula {
   }
 
   public function getResultHTMLForm() {
+    # For some reason, the result form element is included in toHTML()
     return '';
   }
 
@@ -136,6 +158,10 @@ class VyjmenovanaSlova extends SouhlaskyUprostredSlov {
   public static $advanced = '';
   protected $dict_source = array('include/dict/slovnik-i.dict', 'include/dict/slovnik-y.dict');
 
+  /**
+  * @param string $letter Either 'i' or 'y'. Chosen by random if null
+  * @return void
+  */
   function __construct($letter = null) {
     switch ($letter) {
       case 'i':
@@ -245,10 +271,19 @@ class SkladbaSlova extends SouhlaskyUprostredSlov {
 
 class SlovniDruhy extends Formula {
   protected $element;
+
+  /**
+  * @var integer
+  */
   protected $druh;
+
   public static $name = 'Slovn&iacute; druhy';
   public static $subject = '&Ccaron;e&scaron;tina';
   public static $advanced = '';
+
+  /**
+  * @var array List of dictionaries
+  */
   protected $dict_source = array(
     1 => 'include/dict/druh-podstatne.dict',
     2 => 'include/dict/druh-pridavne.dict',
@@ -259,6 +294,10 @@ class SlovniDruhy extends Formula {
     7 => 'include/dict/druh-predlozka.dict',
     8 => 'include/dict/druh-spojka.dict'
   );
+
+  /**
+  * @var array List of names
+  */
   protected $sl_druhy = array(
     1 => 'Podstatn&eacute; jm&eacute;no',
     2 => 'P&rcaron;&iacute;davn&eacute; jm&eacute;no',
@@ -305,6 +344,7 @@ class SlovniDruhy extends Formula {
   }
 
   public function getResultHTMLForm() {
+    # For some reason, the result form element is included in toHTML()
     return '';
   }
 } // class SlovniDruhy

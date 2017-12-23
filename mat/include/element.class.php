@@ -1,11 +1,12 @@
 <?php
-
 define ('OP_PLUS', 1);
 define ('OP_MINUS', 2);
 define ('OP_DELENO', 4);
 define ('OP_KRAT', 8);
 
-
+/**
+* Parent class for all math formula elements
+*/
 abstract class FormulaElement {
   abstract public function toHTML();
   abstract public function toStr();
@@ -15,53 +16,105 @@ abstract class FormulaElement {
   }
 }
 
+/**
+* This class represents a single integer in any formula
+*/
 class PrimitiveElement extends FormulaElement {
+  /**
+  * @var integer
+  */
   protected $element;
 
+  /**
+  * @param integer $value
+  * @return void
+  */
   function __construct($value = 0) {
     $this->element = intval($value);
   }
 
+  /**
+  * @param integer $max
+  * @param integer $min
+  * @return void
+  */
   public function randomize ($max = -1, $min = 0) {
     if ($max < $min) $max = mt_getrandmax();
     $this->element = mt_rand ($min, $max);
   }
 
+  /**
+  * @return integer
+  */
   function getValue() {
     return $this->element;
   }
 
+  /**
+  * @return string
+  */
   public function toHTML() {
     return '<span class="primitive">' . $this. '</span>';
   }
 
+  /**
+  * @return string
+  */
   public function toStr() {
     return '' . $this->getValue();
   }
 }
 
+/**
+* Random integer
+*/
 class RandomPrimitiveElement extends PrimitiveElement {
+  /**
+  * @param integer $max
+  * @param integer $min
+  * @return void
+  */
   function __construct($max = -1, $min = 0) {
     if ($max < $min) { $max = mt_getrandmax(); }
     $this->element = mt_rand($min, $max);
   }
 }
 
+/**
+* Simple operator class - plus, minus, multiplication and division
+*/
 class OperatorElement {
+  /**
+  * Use OP_ constants to set the value.
+  * @var integer
+  */
   protected $operator;
 
+  /**
+  * @param integer $operator
+  */
   function __construct($operator = OP_PLUS) {
     $this->operator = $operator;
   }
 
+  /**
+  * @return integer
+  */
   public function getValue() {
     return $this->operator;
   }
 
+  /**
+  * @return string
+  */
   public function getMath () {
     return static::getMathSymbol($this->operator);
   }
 
+  /**
+  * @param integer $operator
+  * @return string
+  */
   public static function getMathSymbol ($operator) {
     switch ($operator) {
       case OP_PLUS:
@@ -77,6 +130,9 @@ class OperatorElement {
     }
   }
 
+  /**
+  * @return string
+  */
   public function toStr () {
     switch ($this->operator) {
       case OP_KRAT:
@@ -92,6 +148,9 @@ class OperatorElement {
     return $this->toStr();
   }
 
+  /**
+  * @return string
+  */
   public function toHTML() {
     $html = '<span class="operator">';
     switch ($this->operator) {
@@ -109,7 +168,14 @@ class OperatorElement {
   }
 }
 
+/**
+* Random operator class
+*/
 class RandomOperatorElement extends OperatorElement {
+  /**
+  * @param integer $mask Bitmask of operators that should be _excluded_ from the set
+  * @return void
+  */
   function __construct ($mask = 0) {
     $allowed = array();
     if (($mask & OP_PLUS) == 0) $allowed[] = OP_PLUS;
@@ -126,11 +192,32 @@ class RandomOperatorElement extends OperatorElement {
   }
 }
 
+/**
+* This class groups an expression like 3+5, consisting of two elements and an operator in between.
+* Each element can be any FormulaElement, so more complicated formulas are possible.
+*/
 class CombinedElement extends FormulaElement {
+  /**
+  * @var FormulaElement
+  */
   protected $element1;
+
+  /**
+  * @var OperatorElement
+  */
   protected $operator;
+
+  /**
+  * @var FormulaElement
+  */
   protected $element2;
 
+  /**
+  * @param FormulaElement $el1
+  * @param OperatorElement $op
+  * @param FormulaElement $el2
+  * @return void
+  */
   function __construct (FormulaElement $el1 = null, OperatorElement $op = null, FormulaElement $el2 = null) {
     if ($el1 == null) {
       $this->element1 = new RandomPrimitiveElement();
@@ -149,11 +236,17 @@ class CombinedElement extends FormulaElement {
     }
   }
 
+  /**
+  * @return integer
+  */
   public function getValue() {
     $expr = $this->element1->getValue() . $this->operator->getMath() . $this->element2->getValue();
     return eval('return '. $expr. ';');
   }
 
+  /**
+  * @return string
+  */
   public function toHTML() {
     $html = '(&nbsp;';
     $html .= $this->element1->toHTML(). ' ';
@@ -162,6 +255,9 @@ class CombinedElement extends FormulaElement {
     return $html;
   }
 
+  /**
+  * @return string
+  */
   public function toStr () {
     $text = '( ';
     $text .= $this->element1. ' ';
@@ -171,7 +267,16 @@ class CombinedElement extends FormulaElement {
   }
 }
 
+/**
+* Random combined element - two integers with a simple operator between them
+*/
 class RandomCombinedElement extends CombinedElement {
+  /**
+  * @param integer $max
+  * @param integer $min
+  * @param integer $opmask
+  * @return void
+  */
   function __construct($max = 0, $min = 0, $opmask = 0) {
     do {
       $this->element1 = new RandomPrimitiveElement($max, $min);
@@ -182,24 +287,51 @@ class RandomCombinedElement extends CombinedElement {
 }
 
 class FractionElement extends FormulaElement {
+/**
+* Class representing a positive integer that can be expressed as english words
+*/
+class EnglishTextElement {
+  /**
+  * @var integer
+  */
   protected $element;
 
+  /**
+  * @param integer $value
+  * @return void
+  */
   function __construct($value) {
     $this->element = intval($value);
   }
 
+  /**
+  * @return integer
+  */
   public function getValue() {
     return $this->element;
   }
 
+  /**
+  * @return string Returns the number as english words
+  */
   public function toStr() {
     return static::sayNumber($this->element);
   }
+  function __toString() {
+    return $this->toStr();
+  }
 
+  /**
+  * @return string Returns the number as english words
+  */
   public function toHTML() {
     return '<span class="primitive">'. $this. '</span>';
   }
 
+  /**
+  * @param integer $number
+  * @return string Return english text representing a number up to a billion
+  */
   public static function sayNumber($number) {
     switch ($number) {
       case 0: return 'zero';
@@ -257,11 +389,33 @@ class FractionElement extends FormulaElement {
   }
 } // class EnglishTextElement
 
+/**
+* Class representing a SI (or other) unit value
+*/
 class PhysicsElement {
+  /**
+  * @var string SI (or other) unit
+  */
   public $baseunit;
+
+  /**
+  * @var integer
+  */
   protected $element;
+
+  /**
+  * @var string Prefix determining the power of 10
+  */
   protected $prefix;
+
+  /**
+  * List of all base SI units
+  */
   public static $unitlist = array('m', 'g', 's', 'A', 'K', 'mol', 'cd');
+
+  /**
+  * List of all common prefixes
+  */
   public static $prefixmap = array(
         'T' => 12,
         'G' => 9,
@@ -277,6 +431,10 @@ class PhysicsElement {
         'n' => -9
       );
 
+  /**
+  * @param array $value
+  * @return void
+  */
   function __construct($value) {
     $data = explode(' ', $value);
     $this->element = intval($data[0]);
@@ -292,6 +450,10 @@ class PhysicsElement {
     $this->baseunit = $name;
   }
 
+  /**
+  * @param integer $power
+  * @return string Prefix representing the respective power
+  */
   public static function getPrefix($power) {
     foreach (static::$prefixmap as $prefix => $value) {
       if ($power <= $value) return $prefix;
@@ -299,19 +461,38 @@ class PhysicsElement {
     return null;
   }
 
+  /**
+  * @return integer
+  */
   public static function maxpower() {
     return static::$prefixmap[0];
   }
+
+  /**
+  * @return integer
+  */
   public static function minpower() {
     return end(static::$prefixmap);
   }
+
+  /**
+  * @return string
+  */
   public static function maxprefix() {
     return array_keys(static::$prefixmap)[0];
   }
+
+  /**
+  * @return string
+  */
   public static function minprefix() {
     return end(array_keys(static::$prefixmap));
   }
 
+  /**
+  * @param string $prefix
+  * @return integer Power of 10 representing the prefix
+  */
   public static function getPower($prefix) {
     if (isset(static::$prefixmap[$prefix])) {
       return static::$prefixmap[$prefix];
@@ -320,6 +501,10 @@ class PhysicsElement {
     }
   }
 
+  /**
+  * @param string $prefix
+  * @return integer Return the element value converted to a base unit (no prefix)
+  */
   public function getValue($prefix = null) {
     if (in_array($prefix, array_keys(static::$prefixmap))) {
       $diffpower = static::getPower($this->prefix) - static::getPower($prefix);
@@ -328,6 +513,10 @@ class PhysicsElement {
       return $this->element;
     }
   }
+
+  /**
+  * @param string $prefix
+  */
   public function toStr($prefix = null) {
     if (in_array($prefix, array_keys(static::$prefixmap))) {
       return $this->getValue($prefix). ' '. str_replace('xxx', '', $prefix). $this->baseunit;
@@ -339,12 +528,22 @@ class PhysicsElement {
   function __toString() {
     return $this->toStr();
   }
+
+  /**
+  * @param string $prefix
+  */
   public function toHTML($prefix = null) {
     return '<span class="primitive">' . str_replace('u', '&micro;', $this->toStr($prefix)). '</span>';
   }
 } // class PhysicsElement
 
 class RandomPhysicsElement extends PhysicsElement {
+
+  /**
+  * @param string $maxprefix
+  * @param array $units
+  * @return void
+  */
   function __construct($maxprefix = null, $units = null) {
     if (in_array($maxprefix, array_keys(static::$prefixmap))) {
       $maxpower = static::getPower($maxprefix);
@@ -361,6 +560,11 @@ class RandomPhysicsElement extends PhysicsElement {
     }
   }
 
+  /**
+  * @param integer $minpower
+  * @param integer $maxpower
+  * @return integer
+  */
   public static function randomPower($minpower, $maxpower) {
     $options = array();
     foreach (static::$prefixmap as $prefix => $power) {
@@ -372,6 +576,11 @@ class RandomPhysicsElement extends PhysicsElement {
     return array_values($options)[mt_rand(0, $max)];
   }
 
+  /**
+  * @param integer $minprefix
+  * @param integer $maxprefix
+  * @return string
+  */
   public static function randomPrefix($minprefix = null, $maxprefix = null) {
     if ($minprefix === null) $minprefix == static::minprefix();
     if ($maxprefix === null) $maxprefix == static::maxprefix();
@@ -388,13 +597,26 @@ class RandomPhysicsElement extends PhysicsElement {
     return $options[mt_rand(0, $max)];
   }
 
+  /**
+  * @return string
+  */
   public static function randomUnit() {
     return static::$unitlist[mt_rand(0, (count(static::$unitlist) - 1))];
   }
 } // class RandomPhysicsElement
 
+/**
+* Class representing a word
+*/
 class WordElement {
+  /**
+  * @var string
+  */
   protected $word;
+
+  /**
+  * @param string $word
+  */
   function __construct($word) {
     $this->word = $word;
   }
@@ -416,7 +638,14 @@ class WordElement {
   }
 } // class WordElement
 
+/**
+* Random word from a dictionary file
+*/
 class RandomWordElement extends WordElement {
+  /**
+  * @param string $dict Dictionary file path
+  * @return void
+  */
   function __construct($dict) {
     $words = file($dict, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
     $index = mt_rand(0, count($words) - 1);

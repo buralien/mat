@@ -1,13 +1,25 @@
 <?php
 
+/**
+* English number - words to integer
+*/
 class EnglishTextFormula extends Formula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky';
   protected $max;
   protected $min;
   public static $subject = 'Angli&ccaron;tina';
   public static $advanced = 'do {number}';
+
+  /**
+  * @var EnglishTextElement
+  */
   protected $element;
 
+  /**
+  * @param integer $max Default 100
+  * @param integer $min Default 0
+  * @return void
+  */
   function __construct($max = null, $min = null) {
     if ($max === null) $max = 100;
     if (($min === null)||($min < 0)) $min = 0;
@@ -27,6 +39,9 @@ class EnglishTextFormula extends Formula {
     return implode(' ', $text);
   }
 
+  /**
+  * @return integer
+  */
   public function getResult() {
     return $this->element->getValue();
   }
@@ -53,9 +68,15 @@ class EnglishTextFormula extends Formula {
   }
 } // class EnglishTextFormula
 
+/**
+* English numbers - integer to words
+*/
 class ReverseEnglishTextFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (z &ccaron;&iacute;sel)';
 
+  /**
+  * @return string
+  */
   public function getResult() {
     return $this->element->toStr();
   }
@@ -89,6 +110,9 @@ class ReverseEnglishTextFormula extends EnglishTextFormula {
   }
 } // class ReverseEnglishTextFormula
 
+/**
+* English numbers - listen and type integer
+*/
 class EnglishSpeechFormula extends EnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - &ccaron;&iacute;sla)';
 
@@ -106,6 +130,9 @@ class EnglishSpeechFormula extends EnglishTextFormula {
   }
 } // class EnglishSpeechFormula
 
+/**
+* English numbers - listen and type words
+*/
 class ReverseEnglishSpeechFormula extends ReverseEnglishTextFormula {
   public static $name = 'Anglick&eacute; &ccaron;&iacute;slovky (dikt&aacute;t - slova)';
 

@@ -2,26 +2,65 @@
 
 require_once 'formula.class.php';
 
+/**
+* Class that represents a formula type and the associated weight (priority) in each level
+*/
 class FormulaWeight {
+  /**
+  * @var string Name of a formula class
+  */
   private $formula;
+
+  /**
+  * @var array Arguments for the constructor of the formula class
+  */
   private $args;
+
+  /**
+  * @var integer Weight of this formula type - higher value is more likely to be selected
+  */
   private $weight;
 
+  /**
+  * @param string $formula Name of the class representing this formula type
+  * @param array $args Formula class contructor arguments
+  * @param integer $weight How likely this formula type is to be selected. (Default 1000)
+  * @return void
+  */
   function __construct($formula, $args = array(), $weight = 1000) {
     $this->formula = $formula;
     $this->args = $args;
     $this->weight = $weight;
   }
+
+  /**
+  * @return Formula New instance of the $formula class
+  */
   function getFormula() {
     $o = new \ReflectionClass($this->formula);
     return $o->newInstanceArgs($this->args);
   }
+
+  /**
+  * @return integer Weight of this formula type
+  */
   function getWeight() {
     return $this->weight;
   }
+
+  /**
+  * @return string Class name of this formula type
+  */
   function getName() {
     return $this->formula;
   }
+
+  /**
+  * Adjusts the weight of this formula type.
+  * Weight can never go below 1
+  * @param integer $weight The increase of weight (decrease if negative)
+  * @return integer Adjusted new weight
+  */
   function addWeight($weight) {
     if ($this->weight + $weight > 0) {
       $this->weight += $weight;
@@ -30,25 +69,74 @@ class FormulaWeight {
     }
     return $this->weight;
   }
+
+  /**
+  * @return string
+  */
   public function getDescription() {
     $f = $this->formula;
     return $f::$name;
   }
+
+  /**
+  * @return string
+  */
   public function getSubject() {
     $f = $this->formula;
     return $f::$subject;
   }
 }
 
+/**
+* Abstract class for a generic formula level.
+* A level is a set of formula types with different parameters and weights.
+*/
 abstract class GenericLevel implements Countable {
+  /**
+  * @var array List of FormulaWeight objects
+  */
   protected $formulas;
+
+  /**
+  * @var string
+  */
   public $name;
+
+  /**
+  * Starting amount of formulas to be solved and also the upper limit
+  * The level will never go above this number when determining how many formulas
+  * are remaining to be solved.
+  * @var integer
+  */
   public $max_formulas = 10;
+
+  /**
+  * @var integer Number of solved formulas in this level
+  */
   public $solved = 0;
+
+  /**
+  * @var integer Number of correctly solved formulas in this level
+  */
   public $correct = 0;
+
+  /**
+  * @var array List of hashes of formulas already generated
+  */
   protected $solved_hash;
+
+  /**
+  * @var array List of subjects (topics) that are included in this level
+  */
   public $subjects;
 
+  /**
+  * Creates a new instance of a random formula available in this level.
+  * The formula will not be one that was already generated before, unless
+  * the pool of available formulas is alrady exhausted.
+  *
+  * @return Formula Formula object instance, randomly selected
+  */
   public function getFormula() {
     $totalweight = 0;
     foreach ($this->formulas as $frml) {
@@ -75,18 +163,33 @@ abstract class GenericLevel implements Countable {
     return end($this->formulas)->getFormula();
   }
 
+  /**
+  * @return string
+  */
   public function toHTML() {
     return '<h2>'. $this->name. '</h2><p>'. $this->description. '</p>';
   }
 
+  /**
+  * Adjust the weight of the formula type
+  * Weight can never go below 1
+  *
+  * @param string $clsid Name of the class
+  * @param integer $weight Adjustment (default 100)
+  * @return integer Adjusted weight or 0 if class name is not included
+  */
   public function addWeight($clsid, $weight = 100) {
     for ($i=0; $i<count($this->formulas); $i++) {
       if ($this->formulas[$i]->getName() == $clsid) {
         return $this->formulas[$i]->addWeight($weight);
       }
     }
+    return 0;
   }
 
+  /**
+  * @return string Comma separated list of formula type names included in the level
+  */
   public function getDescription() {
     $text = array();
     foreach($this->formulas as $f) {
@@ -95,6 +198,10 @@ abstract class GenericLevel implements Countable {
     return implode(', ', array_unique($text));
   }
 
+  /**
+  * Generates the list of subjects included in the level based on the formulas
+  * @return void
+  */
   protected function setSubjects() {
     $subj = array();
     foreach ($this->formulas as $formula) {
@@ -103,6 +210,11 @@ abstract class GenericLevel implements Countable {
     $this->subjects = array_keys($subj);
   }
 
+  /**
+  * Lists formulas with lowest success rate
+  *
+  * @return string Comma separated list of formula types
+  */
   public function worstFormula() {
     $worst = 0;
     foreach($this->formulas as $formula) {
@@ -119,6 +231,11 @@ abstract class GenericLevel implements Countable {
     return implode(', ', $ret);
   }
 
+  /**
+  * Lists formulas with best success rate
+  *
+  * @return string Comma separated list of formula types
+  */
   public function bestFormula() {
     $best = mt_getrandmax();
     foreach($this->formulas as $formula) {
@@ -142,18 +259,30 @@ abstract class GenericLevel implements Countable {
   }
 }
 
+/**
+* Class used to build custom level using the advanced init form
+*/
 class CustomLevel extends GenericLevel {
+  /**
+  * @return void
+  */
   function __construct () {
     $this->formulas = array();
     $this->name = 'Pokročilé nastavení';
   }
 
+  /**
+  * @param string $clsid Class name
+  * @param array $params Class constructor arguments
+  * @return void
+  */
   public function addFormula($clsid, $params = null) {
     if ($params === null) $params = array();
     $this->formulas[] = new FormulaWeight($clsid, $params);
     $this->setSubjects();
   }
 }
+
 
 class FormulaLevel1 extends GenericLevel {
   function __construct() {

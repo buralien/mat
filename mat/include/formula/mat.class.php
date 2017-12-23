@@ -1,5 +1,37 @@
 <?php
 
+/**
+* Generic class to solve math formulas using static method
+*/
+class FormulaSolver {
+  /**
+  * @param FormulaElement $element1
+  * @param FormulaElement $element2
+  * @param OperatorElement $operator
+  * @return integer
+  */
+  public static function solve(FormulaElement $element1, FormulaElement $element2, OperatorElement $operator) {
+    $expr = $element1->getValue() . $operator->getMath() . $element2->getValue();
+    return eval('return '. $expr. ';');
+  }
+
+  /**
+  * @param array $elements
+  * @param array $operators
+  * @return integer
+  */
+  public static function multisolve($elements, $operators) {
+    if(count($elements) < 1) return null;
+    if((count($elements) - 1) != count($operators)) return null;
+    $expr = array_shift($elements)->getValue();
+    while(count($operators) > 0) {
+      $expr .= array_shift($operators)->getMath();
+      $expr .= array_shift($elements)->getValue();
+    }
+    return eval('return '. $expr. ';');
+  }
+}
+
 class SimpleFormula extends Formula {
   public static $name = 'Aritmetika';
   public static $subject = 'Matematika';
@@ -18,8 +50,7 @@ class SimpleFormula extends Formula {
   }
 
   public function getResult () {
-    $expr = $this->element1->getValue() . $this->operator->getMath() . $this->element2->getValue();
-    return eval('return '. $expr. ';');
+    return FormulaSolver::solve($this->element1, $this->element2, $this->operator);
   }
 
   public function toStr ($result = FALSE) {
@@ -104,9 +135,9 @@ class TripleFormula extends Formula {
       $this->element3 = new PrimitiveElement($el3);
     } while (($this->operator2->getValue() == OP_DELENO) && ($this->element3->getValue() == 0));
   }
+
   public function getResult () {
-    $expr = $this->element1->getValue() . $this->operator1->getMath() . $this->element2->getValue() . $this->operator2->getMath() . $this->element3->getValue();
-    return eval('return '. $expr. ';');
+    return FormulaSolver::multisolve(array($this->element1, $this->element2, $this->element3), array($this->operator1, $this->operator2));
   }
   public function toStr ($result = FALSE) {
     $text = $this->element1. ' ' . $this->operator1. ' ' . $this->element2. ' ' . $this->operator2. ' ' . $this->element3;
@@ -269,18 +300,17 @@ class VelkeScitani extends RandomSimpleFormula {
 
 class DvaSoucty extends TripleFormula {
   public static $name = "S&ccaron;&iacute;t&aacute;n&iacute; a od&ccaron;&iacute;t&aacute;n&iacute; (3 &ccaron;&iacute;sla)";
+  protected $max;
   public static $advanced = 'do {number}';
 
   function __construct ($max = null) {
-    if ($max == null) $max = 1000;
-    self::$name .= ' do '. $max;
+    if ($max === null) $max = 1000;
+    $this->max = $max;
     do {
       $this->element1 = new RandomPrimitiveElement($max, 11);
       $this->element2 = new RandomPrimitiveElement($max, 11);
       $this->operator1 = new RandomOperatorElement(OP_DELENO + OP_KRAT);
-      $test = new SimpleFormula($this->element1->getValue(), $this->operator1->getValue(), $this->element2->getValue());
-      $res1 = $test->getResult();
-      unset($test);
+      $res1 = FormulaSolver::solve($this->element1, $this->element2, $this->operator1);
     } while (($res1 > $max) || ($res1 < 0));
 
     do {
@@ -390,26 +420,30 @@ class MultiFormula extends Formula {
     #TODO: must define case with too few params
     $params = func_get_args();
     if ((count($params) == 2) && (is_array($params[0])) && (is_array($params[1]))) {
-      $this->elements = $params[0];
-      $this->operators = $params[1];
+      foreach($params[0] as $e) {
+        if(is_a($e, 'FormulaElement')) $this->elements[] = $e;
+        elseif(is_numeric($e)) $this->elements[] = new PrimitiveElement($e);
+      }
+      foreach($params[1] as $o) {
+        if(is_a($o, 'OperatorElement')) $this->operators[] = $o;
+      }
     } else {
-      $this->elements[] = array_shift($params);
+      $next = array_shift($params);
+      if(is_a($next, 'FormulaElement')) $this->elements[] = $next;
+      elseif(is_numeric($next)) $this->elements[] = new PrimitiveElement($next);
       while (count($params) > 1) {
-        $this->operators[] = array_shift($params);
-        $this->elements[] = array_shift($params);
+        $next = array_shift($params);
+        if(is_a($next, 'OperatorElement')) $this->operators[] = $next;
+        else continue;
+        $next = array_shift($params);
+        if(is_a($next, 'FormulaElement')) $this->elements[] = $next;
+        elseif(is_numeric($next)) $this->elements[] = new PrimitiveElement($next);
       }
     }
   }
 
   function getResult() {
-    $e = $this->elements;
-    $op = $this->operators;
-    $expr = array_shift($e)->getValue();
-    while(count($op)) {
-      $expr .= array_shift($op)->getMath();
-      $expr .= array_shift($e)->getValue();
-    }
-    return eval('return '. $expr. ';');
+    return FormulaSolver::multisolve($this->elements, $this->operators);
   }
 
   function toStr($result = FALSE) {

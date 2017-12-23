@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Generic class to solve math formulas using static method
+* Generic class to solve math formulas using static methods
 */
 class FormulaSolver {
   /**
@@ -610,7 +610,7 @@ class PrevodJednotek extends Formula {
   public function toStr($result = FALSE) {
     $text = $this->element->toStr($this->sourceprefix);
     if ($result) {
-      $text .= ' == '. $this->element->toStr($this->targetprefix);
+      $text .= ' = '. $this->element->toStr($this->targetprefix);
     }
     return $text;
   }

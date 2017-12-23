@@ -22,8 +22,8 @@ class PrimitiveElement extends FormulaElement {
     $this->element = intval($value);
   }
 
-  public function randomize ($max = null, $min = 0) {
-    if ($max === null) $max = mt_getrandmax();
+  public function randomize ($max = -1, $min = 0) {
+    if ($max < $min) $max = mt_getrandmax();
     $this->element = mt_rand ($min, $max);
   }
 
@@ -41,8 +41,8 @@ class PrimitiveElement extends FormulaElement {
 }
 
 class RandomPrimitiveElement extends PrimitiveElement {
-  function __construct($max = 0, $min = 0) {
-    if ($max == 0) { $max = mt_getrandmax(); }
+  function __construct($max = -1, $min = 0) {
+    if ($max < $min) { $max = mt_getrandmax(); }
     $this->element = mt_rand($min, $max);
   }
 }
@@ -50,8 +50,8 @@ class RandomPrimitiveElement extends PrimitiveElement {
 class OperatorElement {
   protected $operator;
 
-  function __construct($op = OP_PLUS) {
-    $this->operator = $op;
+  function __construct($operator = OP_PLUS) {
+    $this->operator = $operator;
   }
 
   public function getValue() {
@@ -59,11 +59,11 @@ class OperatorElement {
   }
 
   public function getMath () {
-    return OperatorElement::getMathSymbol($this->operator);
+    return static::getMathSymbol($this->operator);
   }
 
-  public static function getMathSymbol ($op) {
-    switch ($op) {
+  public static function getMathSymbol ($operator) {
+    switch ($operator) {
       case OP_PLUS:
         return "+";
       case OP_MINUS:
@@ -173,13 +173,15 @@ class CombinedElement extends FormulaElement {
 
 class RandomCombinedElement extends CombinedElement {
   function __construct($max = 0, $min = 0, $opmask = 0) {
-    $this->element1 = new RandomPrimitiveElement($max, $min);
-    $this->element2 = new RandomPrimitiveElement($max, $min);
-    $this->operator = new RandomOperatorElement($opmask);
+    do {
+      $this->element1 = new RandomPrimitiveElement($max, $min);
+      $this->element2 = new RandomPrimitiveElement($max, $min);
+      $this->operator = new RandomOperatorElement($opmask);
+    } while ($this->getValue() > $max || $this->getValue() < $min || $this->getValue() != floor($this->getValue()));
   }
 }
 
-class EnglishTextElement extends FormulaElement {
+class FractionElement extends FormulaElement {
   protected $element;
 
   function __construct($value) {
@@ -195,7 +197,7 @@ class EnglishTextElement extends FormulaElement {
   }
 
   public function toHTML() {
-    return '<span class="primitive">'. static::sayNumber($this->element). '</span>';
+    return '<span class="primitive">'. $this. '</span>';
   }
 
   public static function sayNumber($number) {
@@ -255,7 +257,7 @@ class EnglishTextElement extends FormulaElement {
   }
 } // class EnglishTextElement
 
-class PhysicsElement extends FormulaElement {
+class PhysicsElement {
   public $baseunit;
   protected $element;
   protected $prefix;
@@ -333,7 +335,9 @@ class PhysicsElement extends FormulaElement {
       return $this->getValue($this->prefix). ' '. str_replace('xxx', '', $this->prefix). $this->baseunit;
       #return ($this->getValue($prefix) / pow(10, static::$prefixmap[$prefix])). ' '. $prefix. $this->baseunit;
     }
-
+  }
+  function __toString() {
+    return $this->toStr();
   }
   public function toHTML($prefix = null) {
     return '<span class="primitive">' . str_replace('u', '&micro;', $this->toStr($prefix)). '</span>';
@@ -389,22 +393,27 @@ class RandomPhysicsElement extends PhysicsElement {
   }
 } // class RandomPhysicsElement
 
-class WordElement extends FormulaElement {
+class WordElement {
   protected $word;
   function __construct($word) {
     $this->word = $word;
   }
+
   public function getValue() {
     return $this->word;
   }
+
   public function toStr() {
     return $this->word;
   }
+
+  function __toString() {
+    return $this->toStr();
+  }
+
   public function toHTML() {
     return '<span class="primitive">'. $this->toStr($this->word). '</span>';
   }
-
-
 } // class WordElement
 
 class RandomWordElement extends WordElement {

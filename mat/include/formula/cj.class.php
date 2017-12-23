@@ -200,7 +200,7 @@ class SkladbaSlova extends SouhlaskyUprostredSlov {
   public static $advanced = '';
   protected $dict_source = array('include/dict/slovnik-bevepe.dict', 'include/dict/slovnik-me.dict');
 
-  function __construct($letter = null) {
+  function __construct() {
     $this->dict = $this->dict_source[mt_rand(0, count($this->dict_source) - 1)];
     $this->element = new RandomWordElement($this->dict);
     $repl = array();
@@ -271,7 +271,7 @@ class SlovniDruhy extends Formula {
   );
 
   function __construct() {
-    $this->druh = mt_rand(1, 8);
+    $this->druh = $this->getNumber(8, 1, array(7, 8));
     $this->element = new RandomWordElement($this->dict_source[$this->druh]);
   }
 

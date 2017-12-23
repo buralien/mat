@@ -23,7 +23,11 @@ class FormulaWeight {
     return $this->formula;
   }
   function addWeight($weight) {
-    if ($this->weight + $weight > 0) $this->weight += $weight;
+    if ($this->weight + $weight > 0) {
+      $this->weight += $weight;
+    } else {
+      $this->weight = 1;
+    }
     return $this->weight;
   }
   public function getDescription() {

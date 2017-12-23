@@ -431,15 +431,16 @@ class MultiFormula extends Formula {
   function toHTML($result = FALSE) {
     $e = $this->elements;
     $op = $this->operators;
-    $text = '<span class="formula"><span class="primitive">'. array_shift($e). '</span>';
-    while(count($op)) {
+    $text = '<span class="formula">'. array_shift($e)->toHTML();
+    while(count($op) > 0) {
       $text .= ' ';
-      $text .= '<span class="operator">'. array_shift($op). '</span>';
+      $text .= array_shift($op)->toHTML();
       $text .= '&nbsp;';
-      $text .= '<span class="primitive">'. array_shift($e). '</span>';
+      $text .= array_shift($e)->toHTML();
     }
+    $text .= ' =&nbsp;';
     if ($result) {
-      $text .= ' =&nbsp;<span class="result">'. $this->getResult(). '</span>';
+      $text .= '<span class="result">'. $this->getResult(). '</span>';
     }
     $text .= '</span>';
     return $text;
@@ -449,16 +450,26 @@ class MultiFormula extends Formula {
 class RandomSimpleMultiFormula extends MultiFormula {
   public static $name = 'Aritmetika s v&iacute;ce &ccaron;&iacutesly';
   public static $advanced = 'do {number} od {number} ({number}-{number} &ccaron;&iacute;sel)';
-  function __construct($max = null, $min = null, $max_num = null, $min_num = null ) {
+  protected $max;
+  protected $min;
+  protected $max_num;
+  protected $min_num;
+
+  function __construct($max = null, $min = null, $min_num = null, $max_num = null ) {
     if ($max == null) $max = floor(mt_getrandmax() / 4);
     if ($min == null) $min = 2;
     if ($max_num == null) $max_num = 4;
     if ($min_num == null) $min_num = 2;
     if ($min < 2) $min = 2;
-    if ($min_num > $max_num) $min_num = $max_num;
+    if ($min_num > $max_num) $min_num = $max_num - 1;
 
-    $num = mt_rand($min_num, $max_num);
-    $this->elements[] = new RandomPrimitiveElement($max, $min);
+    $this->max = $max;
+    $this->min = $min;
+    $this->max_num = $max_num;
+    $this->min_num = $min_num;
+
+    $num = mt_rand($min_num, $max_num - 1);
+    $this->elements[] = new RandomCombinedElement($max, $min);
     $this->operators = array();
     for($i=1;$i<$num;$i++) {
       $op = new RandomOperatorElement();
@@ -472,7 +483,6 @@ class RandomSimpleMultiFormula extends MultiFormula {
       } while ((floor($res) != $res) || ($res < 0) || ($res > $max) || ((($el->getValue() == end($this->elements)->getValue()) || ($el->getValue() > 10) || (end($this->elements)->getValue() / 10 > $el->getValue())) && ($op->getValue() == OP_DELENO)));
       $this->elements[] = new PrimitiveElement($el->getValue());
       $this->operators[] = new OperatorElement($op->getValue());
-      //echo "NEXT ". $this->toStr(TRUE). "\n";
     }
   }
 

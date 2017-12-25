@@ -1,9 +1,11 @@
 <?php
-define ('OP_PLUS', 1);
-define ('OP_MINUS', 2);
-define ('OP_DELENO', 4);
-define ('OP_KRAT', 8);
+
 require_once 'mathsolver.class.php';
+
+define ('OP_PLUS',    0b0001);
+define ('OP_MINUS',   0b0010);
+define ('OP_DELENO',  0b0100);
+define ('OP_KRAT',    0b1000);
 
 /**
 * Parent class for all math formula elements
@@ -30,8 +32,10 @@ class PrimitiveElement extends FormulaElement {
   * @param integer $value
   * @return void
   */
-  function __construct($value = 0) {
-    $this->element = intval($value);
+  function __construct($value) {
+    if (is_numeric($value)) {
+      $this->element = intval($value);
+    } else throw new Exception('Invalid input exception');
   }
 
   /**
@@ -41,7 +45,10 @@ class PrimitiveElement extends FormulaElement {
   */
   public function randomize ($max = -1, $min = 0) {
     if ($max < $min) $max = mt_getrandmax();
-    $this->element = mt_rand ($min, $max);
+    do {
+      $old = $this->element;
+      $this->element = mt_rand ($min, $max);
+    } while ($old == $this->element);
   }
 
   /**
@@ -76,6 +83,7 @@ class RandomPrimitiveElement extends PrimitiveElement {
   * @return void
   */
   function __construct($max = -1, $min = 0) {
+    if (!is_numeric($max) || !is_numeric($min)) throw new Exception('Invalid limit input exception');
     if ($max < $min) { $max = mt_getrandmax(); }
     $this->element = mt_rand($min, $max);
   }
@@ -94,8 +102,10 @@ class OperatorElement {
   /**
   * @param integer $operator
   */
-  function __construct($operator = OP_PLUS) {
-    $this->operator = $operator;
+  function __construct($operator) {
+    if (in_array($operator, [OP_PLUS, OP_MINUS, OP_KRAT, OP_DELENO], true)) {
+      $this->operator = $operator;
+    } else throw new Exception('Invalid operator input exception');
   }
 
   /**
@@ -214,26 +224,28 @@ class CombinedElement extends FormulaElement {
   protected $element2;
 
   /**
-  * @param FormulaElement $el1
-  * @param OperatorElement $op
-  * @param FormulaElement $el2
+  * @param mixed $el1
+  * @param mixed $op
+  * @param mixed $el2
   * @return void
   */
-  function __construct (FormulaElement $el1 = null, OperatorElement $op = null, FormulaElement $el2 = null) {
-    if ($el1 == null) {
-      $this->element1 = new RandomPrimitiveElement();
-    } else {
+  function __construct ($el1 = null, $op = null, $el2 = null) {
+    if (is_subclass_of($el1, 'FormulaElement')) {
       $this->element1 = $el1;
-    }
-    if ($el2 == null) {
-      $this->element2 = new RandomPrimitiveElement();
     } else {
+      $this->element1 = new PrimitiveElement($el1);
+    }
+
+    if (is_subclass_of($el2, 'FormulaElement')) {
       $this->element2 = $el2;
-    }
-    if ($op == null) {
-      $this->operator = new RandomOperatorElement();
     } else {
+      $this->element2 = new PrimitiveElement($el2);
+    }
+
+    if (is_a($op, 'OperatorElement')) {
       $this->operator = $op;
+    } else {
+      $this->operator = new OperatorElement($op);
     }
   }
 
@@ -277,7 +289,8 @@ class RandomCombinedElement extends CombinedElement {
   * @param integer $opmask
   * @return void
   */
-  function __construct($max = 0, $min = 0, $opmask = 0) {
+  function __construct($max = -1, $min = 0, $opmask = 0) {
+    if ($max < $min) { $max = mt_getrandmax(); }
     do {
       $this->element1 = new RandomPrimitiveElement($max, $min);
       $this->element2 = new RandomPrimitiveElement($max, $min);

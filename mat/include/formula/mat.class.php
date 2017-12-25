@@ -1,36 +1,5 @@
 <?php
 
-/**
-* Generic class to solve math formulas using static methods
-*/
-class FormulaSolver {
-  /**
-  * @param FormulaElement $element1
-  * @param FormulaElement $element2
-  * @param OperatorElement $operator
-  * @return integer The solution
-  */
-  public static function solve(FormulaElement $element1, FormulaElement $element2, OperatorElement $operator) {
-    $expr = $element1->getValue() . $operator->getMath() . $element2->getValue();
-    return eval('return '. $expr. ';');
-  }
-
-  /**
-  * @param array $elements Ordered list of elements
-  * @param array $operators Ordered list of operators (one less then the elements)
-  * @return integer The solution
-  */
-  public static function multisolve($elements, $operators) {
-    if(count($elements) < 1) return null;
-    if((count($elements) - 1) != count($operators)) return null;
-    $expr = array_shift($elements)->getValue();
-    while(count($operators) > 0) {
-      $expr .= array_shift($operators)->getMath();
-      $expr .= array_shift($elements)->getValue();
-    }
-    return eval('return '. $expr. ';');
-  }
-}
 
 /**
 * Basic class for simple formulas with two numbers and one operator
@@ -62,7 +31,7 @@ class SimpleFormula extends Formula {
   * @return integer The solution
   */
   public function getResult () {
-    return FormulaSolver::solve($this->element1, $this->element2, $this->operator);
+    return FormulaSolver::solve($this->element1, $this->operator, $this->element2);
   }
 
   public function toStr ($result = FALSE) {
@@ -388,7 +357,7 @@ class DvaSoucty extends TripleFormula {
       $this->element1 = new RandomPrimitiveElement($max, 11);
       $this->element2 = new RandomPrimitiveElement($max, 11);
       $this->operator1 = new RandomOperatorElement(OP_DELENO + OP_KRAT);
-      $res1 = FormulaSolver::solve($this->element1, $this->element2, $this->operator1);
+      $res1 = FormulaSolver::solve($this->element1, $this->operator1, $this->element2);
     } while (($res1 > $max) || ($res1 < 0));
 
     do {

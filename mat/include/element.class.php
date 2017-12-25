@@ -3,6 +3,7 @@ define ('OP_PLUS', 1);
 define ('OP_MINUS', 2);
 define ('OP_DELENO', 4);
 define ('OP_KRAT', 8);
+require_once 'mathsolver.class.php';
 
 /**
 * Parent class for all math formula elements
@@ -240,8 +241,7 @@ class CombinedElement extends FormulaElement {
   * @return integer
   */
   public function getValue() {
-    $expr = $this->element1->getValue() . $this->operator->getMath() . $this->element2->getValue();
-    return eval('return '. $expr. ';');
+    return FormulaSolver::solve($this->element1, $this->operator, $this->element2);
   }
 
   /**

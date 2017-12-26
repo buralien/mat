@@ -99,36 +99,26 @@ abstract class Formula {
     }
     $low = count($lo);
 
-    $top = (1 + $max - $min - $low) * $weight;
-    $top -= count($ex) * $weight;
-    $top +=  $low;
+    $top = $low + (1 + $max - $min - $low - count($ex)) * $weight;
     if ($top < 1) $top = $low;
 
     $a = mt_rand(0, ($top - 1));
+
     if ($a < $low) {
       return $lo[$a];
     } else {
+      $ex = array_merge($ex, $lo);
+      sort($ex);
       $a -= $low;
 
       while (in_array($min, $ex)) {
         $min++;
-      }
-      $corr = 0;
-      while (in_array($min, $lo)) {
-        $min++;
-        $corr++;
       }
 
       $b = floor($a / $weight) + $min;
 
       foreach($ex as $e) {
         if ($b >= $e) $b++;
-      }
-
-      $b -= $corr;
-
-      foreach($lo as $l) {
-        if ($b >= $l) $b++;
       }
 
       return $b;

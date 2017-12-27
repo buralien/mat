@@ -294,10 +294,6 @@ class RandomCombinedElement extends CombinedElement {
   }
 }
 
-class FractionElement extends FormulaElement {
-/**
-* Class representing a positive integer that can be expressed as english words
-*/
 class EnglishTextElement {
   /**
   * @var integer

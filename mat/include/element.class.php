@@ -64,7 +64,7 @@ class PrimitiveElement extends FormulaElement {
   * @return string
   */
   public function toStr() {
-    return '' . $this->getValue();
+    return strrev(implode(' ', str_split(strrev('' . $this->getValue()), 3)));
   }
 }
 

@@ -255,10 +255,10 @@ class CombinedElement extends FormulaElement {
   * @return string
   */
   public function toHTML() {
-    $html = '(&nbsp;';
+    $html = '( ';
     $html .= $this->element1->toHTML(). ' ';
     $html .= $this->operator->toHTML(). '&nbsp;';
-    $html .= $this->element2->toHTML(). '&nbsp;)';
+    $html .= $this->element2->toHTML(). ' )';
     return $html;
   }
 
@@ -540,7 +540,7 @@ class PhysicsElement {
   /**
   * @param string $prefix
   */
-  public function toHTML($prefix = null) {
+  public function toHTML($prefix = 'xxx') {
     return '<span class="primitive">' . str_replace('u', '&micro;', $this->toStr($prefix)). '</span>';
   }
 } // class PhysicsElement

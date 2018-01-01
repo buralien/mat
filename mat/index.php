@@ -297,10 +297,10 @@ if ($check !== null && ($_SESSION['breakend'] < $time || $break_just_started)) {
       } else {
         # Show the correct solution
         $result_msg .= '<p class="correctresult">'. $check->toHTML(TRUE). '</p>';
-        $result_msg .= '<p>Tvoje odpověď: <span class="mistake">';
-        $result_msg .= implode (', ', $results);
-        $result_msg .= '</p>';
       }
+      $result_msg .= '<p>Tvoje odpověď: <span class="mistake">';
+      $result_msg .= implode (', ', $results);
+      $result_msg .= '</p>';
     }
   }
   $html->setBodyAttributes(array('onload' => 'fade(document.getElementById("temporary"));'));

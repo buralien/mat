@@ -294,7 +294,88 @@ class RandomCombinedElement extends CombinedElement {
   }
 }
 
+/**
+* Formula element representing a fraction - that is a numerator divided by a denominator
+*/
 class FractionElement extends FormulaElement {
+  /**
+  * @var integer
+  */
+  protected $numerator;
+
+  /**
+  * @var integer
+  */
+  protected $denominator;
+
+  /**
+  * @param integer $numerator
+  * @param integer $denominator
+  * @return void
+  */
+  function __construct($numerator, $denominator) {
+    if(is_subclass_of($numerator, 'FormulaElement')) {
+      $this->numerator = $numerator;
+    } else {
+      $this->numerator = new PrimitiveElement($numerator);
+    }
+
+    if(is_subclass_of($denominator, 'FormulaElement')) {
+      $this->denominator = $denominator;
+    } else {
+      $this->denominator = new PrimitiveElement($denominator);
+    }
+
+    if ($this->denominator->getValue() == 0) throw new Exception('Fraction denominator equal to zero exception');
+  }
+
+  /**
+  * @param boolean $exact Set to true to prevent rounding of result.
+  * @return float Either rounded to 2 decimal places or max precision
+  */
+  function getValue($exact = false) {
+    $res = $this->numerator->getValue() / $this->denominator->getValue();
+    if ($exact) {
+      return $res;
+    } else {
+      return round($res, 2);
+    }
+  }
+
+  /**
+  * @return string
+  */
+  function toStr() {
+    return $this->numerator->toStr(). '/'. $this->denominator->toStr();
+  }
+
+  /**
+  * @return string
+  */
+  function toHTML() {
+    return '<span class="primitive fraction"><sup>'. $this->numerator->toStr(). '</sup>&frasl;<sub>'. $this->denominator->toStr(). '</sub></span>';
+  }
+} // class FractionElement
+
+/**
+* Random fraction
+*/
+class RandomFractionElement extends FractionElement {
+  /**
+  * @param integer $max
+  * @param integer $min
+  * @return void
+  */
+  function __construct($max = null, $min = null) {
+    if($max === null) $max = mt_getrandmax();
+    if($min === null) $min = 2;
+    $this->numerator = new RandomPrimitiveElement($max, $min);
+    do {
+      $this->denominator = new RandomPrimitiveElement($max, $min);
+    } while ($this->denominator->getValue() < 2 || $this->getValue() == 1);
+  }
+} // class RandomFractionElement
+
 /**
 * Class representing a positive integer that can be expressed as english words
 */

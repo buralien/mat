@@ -55,14 +55,14 @@ class FormulaSolver {
     if((count($elements) - 1) != count($operators)) throw new Exception('Invalid input combination');
     $el = array_shift($elements);
     if (!is_subclass_of($el, 'FormulaElement')) throw new Exception('Invalid element input type');
-    $expr = $el->toStr();
+    $expr = $el->getValue();
     while(count($operators) > 0 && count($elements) > 0) {
       $op = array_shift($operators);
       if (!is_a($op, 'OperatorElement')) throw new Exception('Invalid operator input type');
       $expr .= $op->getMath();
       $el = array_shift($elements);
       if (!is_subclass_of($el, 'FormulaElement')) throw new Exception('Invalid element input type');
-      $expr .= $el->toStr();
+      $expr .= $el->getValue();
     }
     return eval('return '. $expr. ';');
   }

@@ -493,50 +493,48 @@ class PhysicsElement {
   protected $element;
 
   /**
-  * @var string Prefix determining the power of 10
-  */
-  protected $prefix;
-
-  /**
-  * List of all base SI units
+  * @var array List of all base SI units
   */
   public static $unitlist = array('m', 'g', 's', 'A', 'K', 'mol', 'cd');
 
   /**
-  * List of all common prefixes
+  * Must be ordered according to the length of the key!
+  * @var array List of all common prefixes
   */
   public static $prefixmap = array(
+        'da' => 1,
         'T' => 12,
         'G' => 9,
         'M' => 6,
         'k' => 3,
         'h' => 2,
-        'da' => 1,
-        'xxx' => 0,
         'd' => -1,
         'c' => -2,
         'm' => -3,
         'u' => -6,
-        'n' => -9
+        'n' => -9,
+        'xxx' => 0
       );
 
   /**
-  * @param array $value
+  * @param string $value Number and unit, such as '2 kg'
   * @return void
   */
   function __construct($value) {
+    if(!is_string($value)) throw new Exception('Invalid input data type');
     $data = explode(' ', $value);
-    $this->element = intval($data[0]);
-    $name = $data[1];
+    if (count($data) != 2) throw new Exception('Invalid input data format');
+    if (is_numeric($data[0])) $number = intval($data[0]); else throw new Exception('Invalid input data value');
+    if (strlen($data[1]) >= 1) $name = trim($data[1]); else throw new Exception('Invalid input data unit');
     foreach (array_keys(static::$prefixmap) as $prefix) {
-    #foreach(static::$unitlist as $unit) {
-      if (strpos($name, $prefix) !== False) {
-        $this->prefix = $prefix;
+      if (strpos($name, $prefix) === 0) {
         $name = substr($name, strlen($prefix));
+        $number *= pow(10, static::$prefixmap[$prefix]);
         break;
       }
     }
     $this->baseunit = $name;
+    $this->element = $number;
   }
 
   /**
@@ -585,19 +583,16 @@ class PhysicsElement {
   public static function getPower($prefix) {
     if (isset(static::$prefixmap[$prefix])) {
       return static::$prefixmap[$prefix];
-    } else {
-      return null;
-    }
+    } else throw new Exception('Invalid prefix input');
   }
 
   /**
   * @param string $prefix
   * @return integer Return the element value converted to a base unit (no prefix)
   */
-  public function getValue($prefix = null) {
+  public function getValue($prefix = '') {
     if (in_array($prefix, array_keys(static::$prefixmap))) {
-      $diffpower = static::getPower($this->prefix) - static::getPower($prefix);
-      return $this->element * pow(10, $diffpower);
+      return $this->element / pow(10, static::getPower($prefix));
     } else {
       return $this->element;
     }
@@ -605,15 +600,19 @@ class PhysicsElement {
 
   /**
   * @param string $prefix
+  * @return string
   */
-  public function toStr($prefix = null) {
+  public function toStr($prefix = '') {
     if (in_array($prefix, array_keys(static::$prefixmap))) {
       return $this->getValue($prefix). ' '. str_replace('xxx', '', $prefix). $this->baseunit;
     } else {
-      return $this->getValue($this->prefix). ' '. str_replace('xxx', '', $this->prefix). $this->baseunit;
-      #return ($this->getValue($prefix) / pow(10, static::$prefixmap[$prefix])). ' '. $prefix. $this->baseunit;
+      return $this->getValue(). ' '. $this->baseunit;
     }
   }
+
+  /**
+  * @return string
+  */
   function __toString() {
     return $this->toStr();
   }

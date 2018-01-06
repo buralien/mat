@@ -129,5 +129,6 @@ abstract class Formula {
 require_once 'formula/mat.class.php';
 require_once 'formula/cj.class.php';
 require_once 'formula/en.class.php';
+require_once 'formula/preschool.class.php';
 
 ?>

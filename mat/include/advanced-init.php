@@ -72,7 +72,7 @@ JS;
 $html->addScriptDeclaration($js);
 $html->setBodyAttributes(array('onload' => 'start();'));
 
-$subjects = array('Matematika', '&Ccaron;e&scaron;tina', 'Angli&ccaron;tina');
+$subjects = array('Matematika', '&Ccaron;e&scaron;tina', 'Angli&ccaron;tina', 'Předškolní');
 
 $subj_form = array();
 

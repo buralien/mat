@@ -100,7 +100,7 @@ abstract class Formula {
     $low = count($lo);
 
     $top = $low + (1 + $max - $min - $low - count($ex)) * $weight;
-    if ($top < 1) $top = $low;
+    if ($top < 1) $top = max($low, 1);
 
     $a = mt_rand(0, ($top - 1));
 

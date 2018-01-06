@@ -30,7 +30,7 @@ class FormulaWeight {
   function __construct($formula, $args = array(), $weight = 1000) {
     $this->formula = $formula;
     $this->args = $args;
-    $this->weight = $weight;
+    $this->weight = intval($weight);
   }
 
   /**
@@ -278,6 +278,7 @@ class CustomLevel extends GenericLevel {
   */
   public function addFormula($clsid, $params = null) {
     if ($params === null) $params = array();
+    if (implode('', $params) == '') $params = array();
     $this->formulas[] = new FormulaWeight($clsid, $params);
     $this->setSubjects();
   }

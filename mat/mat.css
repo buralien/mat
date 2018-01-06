@@ -120,3 +120,6 @@ span.reference {
 span.mistake {
   color: red;
 }
+span.picture {
+  font-size: 200%;
+}

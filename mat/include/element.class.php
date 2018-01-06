@@ -770,4 +770,11 @@ class RandomWordElement extends WordElement {
   }
 } // class RandomWordElement
 
+class PictureElement extends PrimitiveElement {
+  private $charmap = array('&#x1f682', '&#x1f68b', '&#x1f68c', '&#x1f68e', '&#x1f690');
+  public function toHTML() {
+    return '<span class="picture">'. implode(' ', array_fill(0, $this->element, $this->charmap[mt_rand(0, count($this->charmap) - 1)])). '</span>';
+  }
+}
+
 ?>

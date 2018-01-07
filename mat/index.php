@@ -188,24 +188,20 @@ if($_SESSION['difficulty'] == -1) {
 if (count($advanced_data) > 0) {
   $custom_level = new CustomLevel();
   foreach($advanced_data as $a) {
-    if (isset($a['value'])) {
-      if ($a['value'] == 'yes') {
-        if (isset($a['opmask'])) {
-          if ($a['opmask'] < (OP_PLUS + OP_MINUS + OP_KRAT + OP_DELENO)) {
-            $a['param'][999] = $a['opmask'];
-          } else {
-            $a['param'][999] = 0;
-          }
+    if (isset($a['value']) && ($a['value'] == 'yes')) {
+      if (isset($a['opmask']) && ($a['opmask'] < (OP_PLUS + OP_MINUS + OP_KRAT + OP_DELENO))) {
+        $a['param'][999] = $a['opmask'];
+      } else {
+        $a['param'][999] = 0;
+      }
+      if ((isset($a['param'])) && (count($a['param']) > 0)) {
+        foreach(array_keys($a['param']) as $pk) {
+          # Clean empty params passed from advanced settings
+          if (!$a['param'][$pk]) $a['param'][$pk] = null;
         }
-        if ((isset($a['param'])) && (count($a['param']) > 0)) {
-          foreach(array_keys($a['param']) as $pk) {
-            # Clean empty params passed from advanced settings
-            if (!$a['param'][$pk]) $a['param'][$pk] = null;
-          }
-          $custom_level->addFormula($a['clsid'], array_values($a['param']));
-        } else {
-          $custom_level->addFormula($a['clsid']);
-        }
+        $custom_level->addFormula($a['clsid'], array_values($a['param']));
+      } else {
+        $custom_level->addFormula($a['clsid']);
       }
     }
   }
@@ -287,7 +283,8 @@ if ($check !== null && ($_SESSION['breakend'] < $time || $break_just_started)) {
       $result_msg = '<h2 class="success" id="temporary">Spr&aacute;vn&ecaron;!</h2>';
     } else {
       # Incorrect input
-      if ($_SESSION['countleft'] < $level->max_formulas) { $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft'])); }
+      //if ($_SESSION['countleft'] < $level->max_formulas) { $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft'])); }
+      $_SESSION['countleft'] += min($_SESSION['difficulty'], ($level->max_formulas - $_SESSION['countleft']));
       $spatne=TRUE;
       $level->addWeight(get_class($check), 100);
       $result_msg = '<h2 class="fail" id="temporary">&Scaron;patn&ecaron;!</h2>';

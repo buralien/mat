@@ -185,9 +185,7 @@ class MalaNasobilka extends RandomSimpleFormula {
     for($b=2;$b<=$power;$b++) {
       if (mt_rand(1,2) == 1) $a *= 10;
     }
-    do {
-      $this->element1 = new PrimitiveElement($a);
-    } while ($this->getResult() > (pow(10, $power) * $max));
+    $this->element1 = new PrimitiveElement($a);
   }
 
   public function getName() {

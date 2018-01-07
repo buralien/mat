@@ -1,10 +1,29 @@
 <?php
 
 class StatsManager {
-  private $db;
+  /**
+  * @var SQLite3
+  */
+  private $db = null;
+
+  /**
+  * @var string
+  */
   private $dbpath;
+
+  /**
+  * @var string PHP Session ID
+  */
   private $session;
 
+  /**
+  * Defines the database schema level used in the source code.
+  * In order to increase it, first update the respective functions/source,
+  * and also update the createDDL() function with the new schema changes
+  * Only after all of that is done should this value be increased to match
+  * the new version inserted into the database table schemaversion
+  * @var integer
+  */
   private $SCHEMA_VERSION = 2;
 
   function __construct($sessionid) {
@@ -20,16 +39,27 @@ class StatsManager {
     $this->createDDL();
   }
 
+  /**
+  * @return integer
+  */
   public function getSchemaVersion() {
     $schema = $this->db->querySingle('SELECT MAX(version) from schemaversion');
     if (!$schema) $schema = 0;
     return $schema;
   }
 
+  /**
+  * @return integer
+  */
   private function getCurrentSessionID() {
     return $this->db->querySingle('SELECT rowid FROM levelstats WHERE sessionid="'. $this->session. '" AND action="START" ORDER BY rowid DESC LIMIT 1');
   }
 
+  /**
+  * Creates the database schema from scratch or upgrades current version
+  * to the latest one if such upgrade is needed.
+  * @return void
+  */
   private function createDDL() {
     $this->db->exec('CREATE TABLE IF NOT EXISTS schemaversion (version INTEGER NOT NULL)');
     $schema = $this->getSchemaVersion();
@@ -46,6 +76,11 @@ class StatsManager {
     $this->db->exec('INSERT INTO schemaversion (version) VALUES ('. $this->SCHEMA_VERSION. ')');
   }
 
+  /**
+  * @param Formula $formula
+  * @param array $result
+  * @return boolean Query execution status
+  */
   public function addRecord($formula, $result) {
     if (is_array($result)) {
       $conv = '('. implode(',', $result). ')';
@@ -55,23 +90,43 @@ class StatsManager {
     return $this->db->exec("INSERT INTO stats (sessionid, submitted, levelid, formulaclass, formula, result, correct) VALUES ('". $this->session. "', DateTime('now'), ". $this->getCurrentSessionID(). ", '". SQLite3::escapeString(get_class($formula)). "', '". SQLite3::escapeString($formula->toStr(true)). "', '". SQLite3::escapeString($conv). "', ". ($formula->validateResult($result) ? '1' : '0'). ")");
   }
 
+  /**
+  * @param GenericLevel $level
+  * @return boolean Query execution status
+  */
   public function addStartLevel($level) {
     return $this->addLevel($level, 'START');
   }
 
+  /**
+  * @param GenericLevel $level
+  * @return boolean Query execution status
+  */
   public function addFinishedLevel($level) {
     return $this->addLevel($level, 'FINISH');
   }
 
+  /**
+  * @param GenericLevel $level
+  * @return boolean Query execution status
+  */
   public function addResetLevel($level) {
     return $this->addLevel($level, 'RESET');
   }
 
+  /**
+  * @param GenericLevel $level
+  * @param string $action
+  * @return boolean Query execution status
+  */
   private function addLevel($level, $action) {
     $query = "INSERT INTO levelstats (sessionid, submitted, levelclass, action, leveldata) VALUES ('". $this->session. "', DateTime('now'), '". SQLite3::escapeString(get_class($level)). "', '". $action. "', '". SQLite3::escapeString(json_encode($level)). "')";
     return $this->db->exec($query);
   }
 
+  /**
+  * @return array Associative array with numbers of correctly and incorrectly solved formulas of each class
+  */
   public function getCurrentSessionStats() {
     $query = "SELECT formulaclass, correct, count(*) as cnt FROM stats WHERE levelid=". $this->getCurrentSessionID(). " GROUP BY formulaclass, correct";
     $result = $this->db->query($query);
@@ -86,8 +141,18 @@ class StatsManager {
     return $ret;
   }
 
+  /**
+  * Closes the DB connection
+  * @return boolean Status
+  */
   public function close() {
-    return $this->db->close();
+    if (is_a($this->db, 'SQLite3')) $ret = $this->db->close();
+    unset($this->db);
+    return $ret;
+  }
+
+  function __destruct() {
+    if ($this->db !== null) $this->close();
   }
 }
 

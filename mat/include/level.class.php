@@ -98,7 +98,7 @@ class FormulaWeight {
 * Abstract class for a generic formula level.
 * A level is a set of formula types with different parameters and weights.
 */
-abstract class GenericLevel implements Countable,JsonSerializable  {
+abstract class GenericLevel implements Countable, JsonSerializable  {
   /**
   * @var array List of FormulaWeight objects
   */

@@ -36,7 +36,7 @@ class FormulaWeight {
   /**
   * @return Formula New instance of the $formula class
   */
-  function getFormula() {
+  public function getFormula() {
     $o = new \ReflectionClass($this->formula);
     return $o->newInstanceArgs($this->args);
   }
@@ -44,14 +44,14 @@ class FormulaWeight {
   /**
   * @return integer Weight of this formula type
   */
-  function getWeight() {
+  public function getWeight() {
     return $this->weight;
   }
 
   /**
   * @return string Class name of this formula type
   */
-  function getName() {
+  public function getName() {
     return $this->formula;
   }
 
@@ -61,7 +61,7 @@ class FormulaWeight {
   * @param integer $weight The increase of weight (decrease if negative)
   * @return integer Adjusted new weight
   */
-  function addWeight($weight) {
+  public function addWeight($weight) {
     if ($this->weight + $weight > 0) {
       $this->weight += $weight;
     } else {

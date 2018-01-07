@@ -123,3 +123,15 @@ span.mistake {
 span.picture {
   font-size: 200%;
 }
+
+table.results {
+  border: 1px solid black;
+  padding: 4px;
+}
+td.fail {
+  color: red;
+  font-weight: bold;
+}
+td.pass {
+  color: darkgreen;
+}

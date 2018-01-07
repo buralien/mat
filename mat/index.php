@@ -1,6 +1,25 @@
 <?php
 session_start() or die("Failed to start sessions!");
+
+require_once 'include/stats.class.php';
+require_once 'include/level.class.php';
+
+function encryptObject($f) {
+  return base64_encode(serialize($f));
+}
+
+function decryptObject($text) {
+  return unserialize(base64_decode($text));
+}
+
 if (isset($_GET['startover'])) {
+  if (isset($_SESSION['level'])) {
+    $level = decryptObject($_SESSION['level']);
+    $stats = new StatsManager(session_id());
+    $stats->addResetLevel($level);
+    $stats->close();
+  }
+
   # Destroy saved session data and start over
   session_destroy();
   $_SESSION = array();
@@ -15,8 +34,6 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 header("Pragma: no-cache"); // HTTP/1.0
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
-require_once 'include/level.class.php';
-require_once 'include/stats.class.php';
 require_once 'HTML/Page2.php';
 
 define('MAT_DEBUG', 0); # Set to one to see debug output on the page
@@ -40,8 +57,11 @@ $levels = array(
   'FormulaLevelCestina3'
   );
 
+/**
+*
+* @return string Time difference from now as natural text
+*/
 function sayTime($timestamp) {
-  # Return the time difference as natural text
   $t = abs(time() - $timestamp);
   $ret = array();
   if ($t % 60 > 0) {
@@ -62,12 +82,28 @@ function sayTime($timestamp) {
   return implode(', ', array_reverse($ret));
 }
 
-function encryptObject($f) {
-  return base64_encode(serialize($f));
-}
+/**
+* @return string
+*/
+function buildResultTable($data) {
+  $text = '<table class="results"><tr><th>Příklad</th><th>Správně</th><th>Špatně</th></tr>';
+  foreach($data as $clsid => $row) {
+    if (!isset($row['correct'])) {
+      $row['correct'] = 0;
+    }
+    $text .= '<tr><td>'. $clsid::$name. '</td><td>'. $row['correct']. '</td>';
 
-function decryptObject($text) {
-  return unserialize(base64_decode($text));
+    $failclass = 'pass';
+    if (isset($row['failed'])) {
+      if ($row['failed']) {
+        $failclass = 'fail';
+      }
+    } else {
+      $row['failed'] = 0;
+    }
+    $text .= '<td class="'. $failclass. '">'. $row['failed']. '</td></tr>';
+  }
+  return $text. '</table>';
 }
 
 $html = new HTML_Page2();
@@ -134,6 +170,8 @@ if (!isset($_SESSION['breakstart'])) { // initial setup
     }
   }
 }
+
+$stats = new StatsManager(session_id());
 
 if (isset($_SESSION['level'])) {
   $level = decryptObject($_SESSION['level']);
@@ -233,6 +271,11 @@ if ( $_SESSION['countleft'] === null ) {
   $level->max_formulas = $_SESSION['countleft'];
 }
 
+# Log start level action in stats
+if(isset($_POST['init'])) {
+  $stats->addStartLevel($level);
+}
+
 $js = <<<JS
 function fade(element) {
 var op = 2;
@@ -263,9 +306,7 @@ if ($check !== null && ($_SESSION['breakend'] < $time || $break_just_started)) {
     $res = $check->getResult();
 
     # Log the stats
-    $stats = new StatsManager();
-    $stats->addRecord(session_id(), $check, $results);
-    $stats->close();
+    $stats->addRecord($check, $results);
 
     if (!is_array($res)) {
       $res = array($res);
@@ -319,11 +360,10 @@ if (MAT_DEBUG) $html->addBodyContent('Priklad: <pre>'. print_r($priklad, TRUE). 
 
 if ($_SESSION['countleft'] == 0) {
   # Successfully solved all formulas
+  $stats->addFinishedLevel($level);
   $html->addBodyContent('<h2 class="success">Hotovo!</h2>');
-  if (count($level) > 1) {
-    $html->addBodyContent('<p>Nejlepší: '. $level->bestFormula(). '</p>');
-    $html->addBodyContent('<p>Nejhorší: '. $level->worstFormula(). '</p>');
-  }
+  $html->addBodyContent('<h3>Výsledky</h3>');
+  $html->addBodyContent(buildResultTable($stats->getCurrentSessionStats()));
   $html->addBodyContent('<a href="?startover=1">Spustit znovu</a>');
 } else {
   $html->addBodyContent($result_msg);
@@ -363,5 +403,6 @@ if ((time() - $_SESSION['starttime'] > 2) || ($level->solved > 0)) {
 }
 include 'include/footer.php';
 
+$stats->close();
 $html->display();
 ?>

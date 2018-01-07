@@ -2,13 +2,21 @@
 
 class StatsManager {
   private $db;
+  private $dbpath;
   private $session;
 
   private $SCHEMA_VERSION = 2;
 
   function __construct($sessionid) {
     $this->session = $sessionid;
-    $this->db = new SQLite3('include/stats.db');
+    $this->dbpath = realpath(dirname(__FILE__)). '/stats.db';
+    try {
+      $this->db = new SQLite3($this->dbpath);
+    } catch (Exception $e) {
+      $this->dbpath = tempnam(realpath(dirname(__FILE__)), 'stats.db');
+      $this->db = new SQLite3($this->dbpath);
+    }
+    $this->db->exec('PRAGMA journal_mode = MEMORY');
     $this->createDDL();
   }
 

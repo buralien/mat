@@ -2,12 +2,12 @@
 
 class StatsManager {
   /**
-  * @var SQLite3
+  * @var SQLite3 Database object instance
   */
   private $db = null;
 
   /**
-  * @var string
+  * @var string Path to DB file
   */
   private $dbpath;
 
@@ -149,10 +149,6 @@ class StatsManager {
     if (is_a($this->db, 'SQLite3')) $ret = $this->db->close();
     unset($this->db);
     return $ret;
-  }
-
-  function __destruct() {
-    if ($this->db !== null) $this->close();
   }
 }
 

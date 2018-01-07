@@ -659,9 +659,32 @@ class RandomWordElement extends WordElement {
 } // class RandomWordElement
 
 class PictureElement extends PrimitiveElement {
+  /**
+  * UTF8 codes of characters used
+  * @var array
+  */
   private $charmap = array('&#x1f682', '&#x1f68b', '&#x1f68c', '&#x1f68e', '&#x1f690');
+
+  /**
+  * Character used for display
+  * @var string
+  */
+  private $char;
+
+  /**
+  * @param integer $value
+  * @return void
+  */
+  function __construct($value) {
+    parent::__construct($value);
+    $this->char = $this->charmap[mt_rand(0, count($this->charmap) - 1)];
+  }
+
+  /**
+  * @return string
+  */
   public function toHTML() {
-    return '<span class="picture">'. implode(' ', array_fill(0, $this->element, $this->charmap[mt_rand(0, count($this->charmap) - 1)])). '</span>';
+    return '<span class="picture">'. implode(' ', array_fill(0, $this->element, $this->char)). '</span>';
   }
 }
 

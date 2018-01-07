@@ -56,6 +56,13 @@ class FormulaWeight {
   }
 
   /**
+  * @return array List of formula arguments passed to the constructor
+  */
+  public function getArgs() {
+    return $this->args;
+  }
+
+  /**
   * Adjusts the weight of this formula type.
   * Weight can never go below 1
   * @param integer $weight The increase of weight (decrease if negative)
@@ -91,7 +98,7 @@ class FormulaWeight {
 * Abstract class for a generic formula level.
 * A level is a set of formula types with different parameters and weights.
 */
-abstract class GenericLevel implements Countable {
+abstract class GenericLevel implements Countable,JsonSerializable  {
   /**
   * @var array List of FormulaWeight objects
   */
@@ -256,6 +263,25 @@ abstract class GenericLevel implements Countable {
   */
   public function count() {
     return count($this->formulas);
+  }
+
+  /**
+  * @return array
+  */
+  public function jsonSerialize() {
+    $data = array('maxcount' => $this->max_formulas);
+    if ($this->solved > 0) {
+      $data['solved'] = $this->solved;
+      $data['correct'] = $this->correct;
+    }
+    $data['params'] = array();
+    $data['weight'] = array();
+    foreach($this->formulas as $f) {
+      $c = $f->getName();
+      $data['params'][$c] = $f->getArgs();
+      $data['weight'][$c] = $f->getWeight();
+    }
+    return $data;
   }
 }
 

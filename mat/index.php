@@ -388,7 +388,12 @@ if ($_SESSION['countleft'] == 0) {
 
 if ((time() - $_SESSION['starttime'] > 2) || ($level->solved > 0)) {
   # Progress message with results, time and level name
-  $html->addBodyContent('<p>Spr&aacute;vn&ecaron; <span class="correct">'. $level->correct. '</span> z <span class="solved">'. $level->solved. '</span> p&rcaron;&iacute;klad&uring;');
+  $html->addBodyContent('<p>');
+  if ($_SESSION['nocount'] == "yes" && $_SESSION['countleft'] > 0) {
+    $html->addBodyContent("Příklady");
+  } else {
+    $html->addBodyContent('Spr&aacute;vn&ecaron; <span class="correct">'. $level->correct. '</span> z <span class="solved">'. $level->solved. '</span> p&rcaron;&iacute;klad&uring;');
+  }
   switch ($_SESSION['difficulty']) {
     case 3: $html->addBodyContent(' na&nbsp;těžkou obtížnost '); break;
     case 2: $html->addBodyContent(' na&nbsp;vyšší obtížnost '); break;
@@ -401,6 +406,7 @@ if ((time() - $_SESSION['starttime'] > 2) || ($level->solved > 0)) {
   $html->addBodyContent(' ('. $level->name. ')');
   $html->addBodyContent(' za <span class="time">'. sayTime($_SESSION['starttime']). '</span>.</p>');
 }
+
 include 'include/footer.php';
 
 $stats->close();

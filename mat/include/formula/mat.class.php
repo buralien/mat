@@ -1,6 +1,5 @@
 <?php
 
-
 /**
 * Basic class for simple formulas with two numbers and one operator
 */
@@ -78,7 +77,7 @@ class RandomSimpleFormula extends SimpleFormula {
   * @return void
   */
   function __construct ($max = null, $opmask = null) {
-    if ($max === null) $this->max = floor(mt_getrandmax() / 4);
+    if ($max === null) $max = floor(mt_getrandmax() / 4);
     if ($opmask === null) $opmask = 0;
     $this->max = $max;
     do {

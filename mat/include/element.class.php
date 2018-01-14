@@ -658,12 +658,15 @@ class RandomWordElement extends WordElement {
   }
 } // class RandomWordElement
 
+/**
+* Number represented as the amount of pictures
+*/
 class PictureElement extends PrimitiveElement {
   /**
   * UTF8 codes of characters used
   * @var array
   */
-  private $charmap = array('&#x1f682', '&#x1f68b', '&#x1f68c', '&#x1f68e', '&#x1f690');
+  private $charmap = array('&#x1f682', '&#x1f687', '&#x1f68b', '&#x1f68c', '&#x1f68d', '&#x1f68e', '&#x1f690', '&#x1f6a0', '&#x1f6a2', '&#x1f6e4', '&#x1f6f4');
 
   /**
   * Character used for display
@@ -681,6 +684,7 @@ class PictureElement extends PrimitiveElement {
   }
 
   /**
+  * Display number of pictures equal to $element
   * @return string
   */
   public function toHTML() {

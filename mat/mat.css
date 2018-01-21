@@ -141,3 +141,6 @@ td.fail {
 td.pass {
   color: darkgreen;
 }
+.matrix {
+  line-height: 1;
+}

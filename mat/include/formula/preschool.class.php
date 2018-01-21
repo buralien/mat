@@ -60,4 +60,32 @@ class PreschoolAdditionFormula extends SimpleFormula {
   }
 }
 
+class PreschoolMatrixFormula extends MalaNasobilka {
+  public static $name = "Násobení pro děti";
+  public static $subject = 'Předškolní';
+  public static $advanced = 'do {number}';
+
+  private $picture;
+
+  function __construct($max = 20) {
+    do {
+      parent::__construct();
+      $res = $this->getResult();
+    } while ($res > $max || $res < 1);
+    $this->picture = new PictureElement(1);
+  }
+
+  public function toHTML($result = false) {
+    $text = '<span class="formula matrix">';
+    for($row=0; $row < $this->element1->getValue(); $row++) {
+      $text .= str_repeat($this->picture->toHTML(). '&nbsp;', $this->element2->getValue()). '<br />';
+    }
+    $text .= '=&nbsp;';
+    if ($result) {
+      $text .= '<span class="result">'. $this->getResult(). '</span>';
+    }
+    return $text. '</span>';
+  }
+}
+
 ?>

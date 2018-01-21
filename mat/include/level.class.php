@@ -439,6 +439,17 @@ class FormulaLevelCestina3 extends GenericLevel {
   }
 }
 
+class FormulaLevelPreschool extends GenericLevel {
+  function __construct() {
+    $this->name = 'Předškolní počítání';
+    $this->formulas = array();
+    $this->formulas[] = new FormulaWeight('PreschoolCountFormula', array(9));
+    $this->formulas[] = new FormulaWeight('PreschoolAdditionFormula', array(9));
+    $this->formulas[] = new FormulaWeight('PreschoolMatrixFormula', array(9));
+    $this->setSubjects();
+  }
+}
+
 class TestLevel extends GenericLevel {
   function __construct() {
     $this->name = 'Test';

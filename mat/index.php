@@ -54,7 +54,8 @@ $levels = array(
   'FormulaLevelVyjmenovanaSlova',
   'FormulaLevelVyjmenovanaSlovaDiktat',
   'FormulaLevelRomanNumerals',
-  'FormulaLevelCestina3'
+  'FormulaLevelCestina3',
+  'FormulaLevelPreschool'
   );
 
 /**

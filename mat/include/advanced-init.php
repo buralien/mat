@@ -127,7 +127,8 @@ $html->addBodyContent('<br /><label><input type="number" name="countleft" value=
 $html->addBodyContent('<br /><label><input type="checkbox" name="nofail" id="nofail" value="yes" checked="checked" />&nbsp;Opravovat p&rcaron;&iacute;klady</label>');
 $html->addBodyContent('<br /><label><input type="checkbox" name="nocount" id="nocount" value="yes" />&nbsp;Nezobrazovat zbývající</label>');
 
-$html->addBodyContent('<br /><input type="submit" class="init" name="init" value="Za&ccaron;&iacute;t" />');
+$html->addBodyContent('<br /><input type="submit" class="init" name="init" value="Za&ccaron;&iacute;t" />&nbsp;');
+$html->addBodyContent('<a href="?startover=1">Zpět</a>');
 $html->addBodyContent('</form>');
 
 ?>

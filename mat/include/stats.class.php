@@ -24,7 +24,7 @@ class StatsManager {
   * the new version inserted into the database table schemaversion
   * @var integer
   */
-  private $SCHEMA_VERSION = 2;
+  private $SCHEMA_VERSION = 3;
 
   function __construct($sessionid) {
     $this->session = $sessionid;
@@ -71,6 +71,8 @@ class StatsManager {
         $this->db->exec('CREATE TABLE IF NOT EXISTS levelstats (id INTEGER PRIMARY KEY, sessionid TEXT, submitted INTEGER NOT NULL, levelclass TEXT NOT NULL, action TEXT NOT NULL, leveldata TEXT NOT NULL)');
       case 1:
         $this->db->exec('ALTER TABLE stats ADD COLUMN levelid INTEGER NOT NULL DEFAULT 0');
+      case 2:
+        $this->db->exec('ALTER TABLE stats ADD COLUMN ip_address TEXT');
     }
 
     $this->db->exec('INSERT INTO schemaversion (version) VALUES ('. $this->SCHEMA_VERSION. ')');
@@ -87,7 +89,18 @@ class StatsManager {
     } else {
       $conv = $result;
     }
-    return $this->db->exec("INSERT INTO stats (sessionid, submitted, levelid, formulaclass, formula, result, correct) VALUES ('". $this->session. "', DateTime('now'), ". $this->getCurrentSessionID(). ", '". SQLite3::escapeString(get_class($formula)). "', '". SQLite3::escapeString($formula->toStr(true)). "', '". SQLite3::escapeString($conv). "', ". ($formula->validateResult($result) ? '1' : '0'). ")");
+    $data = array(
+      'sessionid' => "'". SQLite3::escapeString($this->session). "'",
+      'submitted' => "DateTime('now')",
+      'levelid' => $this->getCurrentSessionID(),
+      'formulaclass' => "'". SQLite3::escapeString(get_class($formula)). "'",
+      'formula' => "'". SQLite3::escapeString($formula->toStr(true)). "'",
+      'result' => "'". SQLite3::escapeString($conv). "'",
+      'correct' => ($formula->validateResult($result) ? '1' : '0'),
+      'ip_address' => "'". $_SERVER['REMOTE_ADDR']. "'"
+    );
+    $query = "INSERT INTO stats (". implode(',', array_keys($data)). ") VALUES (". implode(',', $data). ")";
+    return $this->db->exec($query);
   }
 
   /**

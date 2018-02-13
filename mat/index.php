@@ -306,11 +306,6 @@ if ($check !== null && ($_SESSION['breakend'] < $time || $break_just_started)) {
     if (!is_array($res)) {
       $res = array($res);
     }
-    if (($check instanceof DeleniSeZbytkem) && (!isset($results['result2']))) {
-      # Empty input is considered a zero
-      $results['result2'] = 0;
-    }
-
     if ($check->validateResult($results)) {
       # Correct input
       $_SESSION['countleft']--;

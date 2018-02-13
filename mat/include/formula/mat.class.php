@@ -305,6 +305,10 @@ class DeleniSeZbytkem extends RandomSimpleFormula {
 
   public function validateResult($input) {
     if (is_array($input)) {
+      if (!isset($input['result2'])) {
+        # Empty input is considered a zero
+        $results['result2'] = 0;
+      }
       if (count($input) == 2) {
         return ( $this->getResult() == array_values($input) );
       } else return FALSE;

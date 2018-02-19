@@ -22,11 +22,34 @@ if (isset($_GET['startover'])) {
 
   # Destroy saved session data and start over
   session_destroy();
-  $_SESSION = array();
-  #header($_SERVER["SERVER_PROTOCOL"]." 303 See Other");
-  header('Location: ?', true, 303);
+  header('Location: index.php', true, 303);
+  die();
+} elseif (isset($_GET['restart'])) {
+  if (isset($_SESSION['level'])) {
+    $level = decryptObject($_SESSION['level']);
+    $s_difficulty = $_SESSION['difficulty'];
+    $s_nofail = $_SESSION['nofail'];
+    $s_nocount = $_SESSION['nocount'];
+
+    $stats = new StatsManager(session_id());
+    $stats->addRestartLevel($level);
+    $stats->close();
+
+    session_destroy();
+    session_start();
+    $_SESSION = array(
+      'countleft' => $level->max_formulas,
+      'level' => encryptObject(clone $level),
+      'difficulty' => $s_difficulty,
+      'nofail' => $s_nofail,
+      'nocount' => $s_nocount
+    );
+    session_write_close();
+  }
+  header('Location: index.php', true, 303);
   die();
 }
+
 # Prevent caching of pages
 header("Cache-Control: no-store, no-cache, must-revalidate"); // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -247,8 +270,7 @@ if (MAT_DEBUG) $html->addBodyContent('Check: <pre>'. print_r($check, true). '</p
 if ( $_SESSION['countleft'] === null ) {
   # No setup was done yet, reset SESSION and display the initial page
   session_destroy();
-  $_SESSION = array();
-  $_SESSION['gitcommit'] = $githash;
+  $_SESSION = array('gitcommit' => $githash);
 
   if (isset($_POST['advanced'])) {
     include 'include/advanced-init.php';
@@ -354,7 +376,7 @@ if ($_SESSION['countleft'] == 0) {
   $html->addBodyContent('<h2 class="success">Hotovo!</h2>');
   $html->addBodyContent('<h3>Výsledky</h3>');
   $html->addBodyContent(buildResultTable($stats->getCurrentSessionStats()));
-  $html->addBodyContent('<a href="?startover=1">Spustit znovu</a>');
+  $html->addBodyContent('<a href="?startover=1">Spustit znovu</a>, <a href="?restart=1">opakovat stejné příklady</a>');
 } else {
   $html->addBodyContent($result_msg);
   if ($_SESSION['breakend'] === 0) {

@@ -22,6 +22,11 @@ class FormulaWeight {
   private $weight;
 
   /**
+  * @var integer Initial weight of this formula type before being adjusted
+  */
+  private $initialweight;
+
+  /**
   * @param string $formula Name of the class representing this formula type
   * @param array $args Formula class contructor arguments
   * @param integer $weight How likely this formula type is to be selected. (Default 1000)
@@ -31,6 +36,7 @@ class FormulaWeight {
     $this->formula = $formula;
     $this->args = $args;
     $this->weight = intval($weight);
+    $this->initialweight = $this->weight;
   }
 
   /**
@@ -91,6 +97,10 @@ class FormulaWeight {
   public function getSubject() {
     $f = $this->formula;
     return $f::$subject;
+  }
+
+  public function __clone() {
+    $this->weight = $this->initialweight;
   }
 }
 
@@ -282,6 +292,17 @@ abstract class GenericLevel implements Countable, JsonSerializable  {
       $data['weight'][$c] = $f->getWeight();
     }
     return $data;
+  }
+
+  public function __clone() {
+    $this->solved = -1;
+    $this->solved_hash = array();
+    $this->correct = 0;
+    $f = array();
+    foreach ($this->formulas as $formula) {
+      $f[] = clone $formula;
+    }
+    $this->formulas = $f;
   }
 }
 

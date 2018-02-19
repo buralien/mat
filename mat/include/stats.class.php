@@ -52,7 +52,7 @@ class StatsManager {
   * @return integer
   */
   private function getCurrentSessionID() {
-    return $this->db->querySingle('SELECT rowid FROM levelstats WHERE sessionid="'. $this->session. '" AND action="START" ORDER BY rowid DESC LIMIT 1');
+    return $this->db->querySingle('SELECT rowid FROM levelstats WHERE sessionid="'. $this->session. '" AND (action="START" OR action="RESTART") ORDER BY rowid DESC LIMIT 1');
   }
 
   /**
@@ -125,6 +125,14 @@ class StatsManager {
   */
   public function addResetLevel($level) {
     return $this->addLevel($level, 'RESET');
+  }
+
+  /**
+  * @param GenericLevel $level
+  * @return boolean Query execution status
+  */
+  public function addRestartLevel($level) {
+    return $this->addLevel($level, 'RESTART');
   }
 
   /**

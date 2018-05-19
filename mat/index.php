@@ -313,7 +313,8 @@ $spatne = FALSE;
 $priklad = null;
 $result_msg = '';
 if ($check !== null && ($_SESSION['breakend'] < $time || $break_just_started)) {
-  if (implode("", $results) == "") {
+  $res = implode("", $results);
+  if (($res == "") || ($res == "*")) {
     # Empty input submitted
     $level->solved -= 1;
     $level->addWeight(get_class($check), 100);

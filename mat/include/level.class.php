@@ -336,7 +336,8 @@ class FormulaLevel1 extends GenericLevel {
   function __construct() {
     $this->name = '1. t&rcaron;&iacute;da';
     $this->formulas = array();
-    $this->formulas[] = new FormulaWeight('RandomSimpleFormula', array(10, OP_MINUS + OP_KRAT + OP_DELENO));
+    $this->formulas[] = new FormulaWeight('RandomSimpleFormula', array(20, OP_KRAT + OP_DELENO));
+    $this->formulas[] = new FormulaWeight('RandomEqualityFormula', array(20));
     $this->setSubjects();
   }
 }

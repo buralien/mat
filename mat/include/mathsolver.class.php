@@ -5,6 +5,10 @@ define ('OP_MINUS',   0b0010);
 define ('OP_DELENO',  0b0100);
 define ('OP_KRAT',    0b1000);
 
+define ('EQOP_VETSI', 0b001);
+define ('EQOP_MENSI', 0b010);
+define ('EQOP_ROVNO', 0b100);
+
 /**
 * Generic class to solve math formulas using static methods
 */

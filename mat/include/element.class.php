@@ -692,4 +692,81 @@ class PictureElement extends PrimitiveElement {
   }
 }
 
+/**
+* Simple operator class - less then, greater then, equals and combinations
+*/
+class EqualityOperatorElement {
+  /**
+  * Use EQOP_ constants to set the value.
+  * @var integer
+  */
+  protected $operator;
+
+  public $allowed_operators = array(EQOP_MENSI, EQOP_VETSI, EQOP_ROVNO);
+
+  /**
+  * @param integer $operator
+  */
+  function __construct($operator) {
+    if (in_array($operator, array_values($this->allowed_operators), true)) {
+      $this->operator = $operator;
+    } else throw new Exception('Invalid operator input exception');
+  }
+
+  /**
+  * @return integer
+  */
+  public function getValue() {
+    return $this->operator;
+  }
+
+  /**
+  * @return string
+  */
+  public function getMath () {
+    return static::getMathSymbol($this->operator);
+  }
+
+  /**
+  * @param integer $operator
+  * @return string
+  */
+  public static function getMathSymbol ($operator) {
+    switch ($operator) {
+      case EQOP_MENSI:
+        return "<";
+      case EQOP_VETSI:
+        return ">";
+      case EQOP_ROVNO:
+        return "=";
+      default:
+        return " ";
+    }
+  }
+
+  /**
+  * @return string
+  */
+  public function toStr () {
+    switch ($this->operator) {
+      default:
+        return $this->getMath();
+    }
+  }
+
+  public function __toString() {
+    return $this->toStr();
+  }
+
+  /**
+  * @return string
+  */
+  public function toHTML() {
+    $html = '<span class="operator">';
+    $html .= str_replace(array('<', '>', '='), array('&lt;', '&gt;', '&equals;'), $this->toStr());
+    $html .= '</span>';
+    return $html;
+  }
+}
+
 ?>

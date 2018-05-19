@@ -756,4 +756,90 @@ class PrevodJednotek extends Formula {
   }
 }  // class PrevodJednotek
 
+class EqualityFormula extends SimpleFormula {
+  public static $name = 'Porovnávání';
+  public static $subject = 'Matematika';
+  public static $advanced = 'ignore';
+
+  /**
+  * @param integer $el1 Element 1
+  * @param integer $el2 Element 2
+  * @return void
+  */
+  function __construct ($el1, $el2) {
+    $this->element1 = new PrimitiveElement($el1);
+    $this->element2 = new PrimitiveElement($el2);
+    $this->constructOp();
+  }
+
+  protected function constructOp() {
+    if ($this->element1 > $this->element2) { $this->operator = new EqualityOperatorElement(EQOP_VETSI); }
+    elseif ($this->element1 < $this->element2) { $this->operator = new EqualityOperatorElement(EQOP_MENSI); }
+    else { $this->operator = new EqualityOperatorElement(EQOP_ROVNO); }
+  }
+
+  /**
+  * @return integer The solution
+  */
+  public function getResult () {
+    return $this->operator->getValue();
+  }
+
+  public function toStr ($result = FALSE) {
+    $text = $this->element1. ' ';
+    if ($result) {
+      $text .= $this->operator->getMath(). ' ';
+    } else {
+      $text .= '?? ';
+    }
+    $text .= $this->element2;
+    return $text;
+  }
+
+  public function toHTML ($result = FALSE) {
+    $html = '<span class="formula">';
+    $html .= $this->element1->toHTML() . '&nbsp;';
+    if ($result) {
+      $html .= '<span class="result">'. $this->operator->toHTML(). '</span>&nbsp;';
+    } else {
+      $html .= '<span class="result"><label class="select"><select name="result1" class="select"><option value="*"> </option>';
+      $html .= '<option value="'. EQOP_MENSI. '">&lt;</option>';
+      $html .= '<option value="'. EQOP_VETSI. '">&gt;</option>';
+      $html .= '<option value="'. EQOP_ROVNO. '">&equals;</option>';
+      $html .= '</select></label></span>&nbsp;';
+    }
+    $html .= $this->element2->toHTML();
+    $html .= '</span>';
+    return $html;
+  }
+
+  public function getResultHTMLForm() {
+    # For some reason, the result form element is included in toHTML()
+    return '';
+  }
+}
+
+/**
+* Randomly generated SimpleFormula object
+*/
+class RandomEqualityFormula extends EqualityFormula {
+  protected $max;
+
+  /**
+  * @param integer $max Maximum number. Default floor(mt_getrandmax() / 4)
+  * @return void
+  */
+  function __construct ($max = null) {
+    if ($max === null) $max = floor(mt_getrandmax() / 4);
+    $this->max = $max;
+    $this->element1 = new RandomPrimitiveElement($max, 1);
+    $this->element2 = new RandomPrimitiveElement($max, 1);
+    $this->constructOp();
+  }
+
+  public function getName() {
+    return static::$name. ' do '. $this->max;
+  }
+} // class RandomSimpleFormula
+
 ?>
